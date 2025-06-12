@@ -6,18 +6,13 @@
   <title>DXuwu Szto - Profile</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
-  <script type="text/javascript" src="js/script.js"></script>
   <link type="text/css" rel="stylesheet" href="css/style.css"/>
 </head>
 <body class="font-inter">
-  <!-- Loader -->
   <div class="loader hidden" id="loader">
     <div class="spinner"></div>
   </div>
-
-  <!-- Main Container -->
   <div class="box-container">
-    <!-- Navigation -->
     <nav class="bg-transparent p-6">
       <div class="nav-container flex justify-between items-center">
         <h1 class="text-2xl font-bold font-orbitron text-[var(--primary)]">DXuwu Szto</h1>
@@ -38,10 +33,7 @@
         </label>
       </div>
     </nav>
-
-    <!-- Main Content -->
     <main class="p-4 sm:p-8">
-      <!-- About Section -->
       <section id="about" class="content-section active">
         <h2 class="text-4xl font-bold font-orbitron mb-6 text-center text-[var(--primary)]">Who I Am</h2>
         <div class="about-section flex flex-col items-center md:flex-row md:items-center gap-6 mb-8">
@@ -72,7 +64,7 @@
               </a>
             </p>
             <div id="music-display-box" class="music-box fade-item">
-              <img alt = '' class="logo">
+              <img alt="" class="logo">
               <div id="loading-spinner" class="flex items-center justify-center p-4">
                 <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -96,8 +88,6 @@
           <a href="#contact" class="connect-button nav-link inline-block bg-transparent border-2 border-[var(--primary)] text-[var(--primary)] font-orbitron font-semibold py-2 px-6 rounded hover:bg-[var(--primary)] hover:text-white transition" data-section="contact">Connect Now</a>
         </p>
       </section>
-
-      <!-- Interests Section -->
       <section id="interests" class="content-section">
         <h2 class="text-4xl font-bold font-orbitron mb-6 text-center text-[var(--primary)]">What Lights Me Up</h2>
         <div class="interests-grid grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -127,8 +117,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Contact Section -->
       <section id="contact" class="content-section">
         <h2 class="text-4xl font-bold font-orbitron mb-6 text-center text-[var(--primary)] fade-item">Connect With Me</h2>
         <p class="text-lg mb-6 text-center fade-item">Reach out on my socials or send me an email!</p>
@@ -175,10 +163,9 @@
       </section>
     </main>
   </div>
-
-  <!-- Footer -->
   <footer class="text-center py-4">
-    <p>&copy; 2025 DXuwu. All rights reserved.</p>
+    <p>© 2025 DXuwu. All rights reserved.</p>
   </footer>
+  <script type="text/javascript" src="js/script.js"></script>
 </body>
 </html>

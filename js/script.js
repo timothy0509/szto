@@ -122,7 +122,7 @@
         setInterval(calculateCountdown, 1000);
 
         // Music Display Box and Profile Picture Script
-        const API_URL = 'https://api.lanyard.rest/v1/users/511031197455876128';
+        const API_URL = 'https://api.lanyard.rest/v1/users/1070322209081540689';
         const musicDisplayBox = document.getElementById('music-display-box');
         const musicContentDiv = document.getElementById('music-content');
         const loadingSpinner = document.getElementById('loading-spinner');

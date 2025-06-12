@@ -129,7 +129,7 @@ function updateMusicDisplay(musicData, discordStatus, avatarUrl, musicSource) {
     elements.logo.alt = 'Spotify Logo';
     elements.logo.classList.remove('hidden');
   } else if (musicSource === 'Tidal') {
-    elements.logo.src = 'https://w7.pngwing.com/pngs/973/746/png-transparent-tidal-round-logo-tech-companies-thumbnail.png';
+    elements.logo.src = 'https://media.discordapp.net/external/9GtXl3_in2rFylaCJKmVNeIanZSaXiHbs5x4KV4NKVU/https/live.musicpresence.app/v3/icons/tidal/discord-small-image.png';
     elements.logo.alt = 'Tidal Logo';
     elements.logo.classList.remove('hidden');
   } else {

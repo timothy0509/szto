@@ -390,7 +390,7 @@ body.dark {
     flex-shrink: 0;
 }
 
-.spotify-logo {
+.logo {
     width: 24px;
     height: 24px;
     position: absolute;
@@ -541,7 +541,7 @@ body.dark {
         width: 120px;
         height: 120px;
     }
-    .spotify-logo {
+    .logo {
         width: 32px;
         height: 32px;
     }
@@ -564,7 +564,7 @@ body.dark {
     .music-box {
         padding: 0.75rem;
     }
-    .spotify-logo {
+    .logo {
         width: 20px;
         height: 20px;
     }

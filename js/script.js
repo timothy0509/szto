@@ -18,9 +18,19 @@ const elements = {
   sections: document.querySelectorAll('.content-section'),
   loader: document.getElementById('loader'),
   timezoneInfo: document.getElementById('timezone-info'),
-  birthdayCountdown: document.getElementById('birthday-countdown')
+  birthdayCountdown: document.getElementById('birthday-countdown'),
+  activityDisplayBox: document.getElementById('activity-display-box'),
+  activityContent: document.getElementById('activity-content'),
+  activityLoadingSpinner: document.getElementById('activity-loading-spinner'),
+  activityIcon: document.getElementById('activity-icon'),
+  activityName: document.getElementById('activity-name'),
+  activityDetails: document.getElementById('activity-details'),
+  activityState: document.getElementById('activity-state'),
+  activityStatusMessage: document.getElementById('activity-status-message'),
+  activityTextContent: document.getElementById('activity-text-content'),
 };
 let currentTrackId = null;
+let currentActivityId = null;
 
 function initializeTheme() {
   const savedTheme = localStorage.getItem('theme') || 'light';
@@ -171,12 +181,50 @@ function updateMusicDisplay(musicData, discordStatus, avatarUrl, musicSource) {
   elements.musicContent.classList.remove('hidden');
 }
 
+function updateActivityDisplay(activityData) {
+  if (activityData) {
+    elements.activityIcon.src = activityData.icon_url || 'https://via.placeholder.com/100';
+    elements.activityIcon.alt = activityData.name || 'Activity Icon';
+    elements.activityName.textContent = activityData.name || 'Unknown Activity';
+    elements.activityDetails.textContent = activityData.details || '';
+    elements.activityState.textContent = activityData.state || '';
+    elements.activityStatusMessage.textContent = `Playing ${activityData.name || 'an activity'}`;
+
+    adjustFontSize(elements.activityName, 30, 'text-2xl', 'text-xl');
+    adjustFontSize(elements.activityDetails, 40, 'text-base', 'text-sm');
+    adjustFontSize(elements.activityState, 40, 'text-base', 'text-sm');
+
+    elements.activityTextContent.classList.remove('text-center');
+    elements.activityTextContent.classList.add('md:items-start', 'text-left');
+    elements.activityIcon.classList.remove('hidden');
+  } else {
+    elements.activityIcon.classList.add('hidden');
+    elements.activityName.textContent = '';
+    elements.activityDetails.textContent = '';
+    elements.activityState.textContent = '';
+    elements.activityStatusMessage.textContent = 'Not currently playing any games or activities.';
+    elements.activityName.classList.remove('text-xl');
+    elements.activityName.classList.add('text-2xl');
+    elements.activityDetails.classList.remove('text-sm');
+    elements.activityDetails.classList.add('text-base');
+    elements.activityState.classList.remove('text-sm');
+    elements.activityState.classList.add('text-base');
+    elements.activityTextContent.classList.add('text-center');
+    elements.activityTextContent.classList.remove('md:items-start', 'text-left');
+  }
+  elements.activityContent.classList.remove('hidden');
+}
+
 async function fetchMusicData() {
   try {
     if (elements.musicContent.classList.contains('hidden')) {
       elements.loadingSpinner.classList.remove('hidden');
     }
+    if (elements.activityContent.classList.contains('hidden')) {
+      elements.activityLoadingSpinner.classList.remove('hidden');
+    }
     elements.musicContent.classList.add('hidden');
+    elements.activityContent.classList.add('hidden');
 
     const response = await fetch(API_URL);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -187,6 +235,7 @@ async function fetchMusicData() {
       const avatarUrl = discord_user ? `https://cdn.discordapp.com/avatars/${discord_user.id}/${discord_user.avatar}.png` : null;
 
       let tidal = null;
+      let otherActivity = null;
       for (const activity of activities) {
         if (activity.name === 'TIDAL' && activity.details && activity.state) {
           let albumArtUrl = null;
@@ -206,26 +255,53 @@ async function fetchMusicData() {
             album: activity.assets?.large_text || 'Unknown Album',
             album_art_url: albumArtUrl
           };
-          break;
+        } else if (activity.name !== 'TIDAL' && activity.name !== 'Spotify' && (activity.details || activity.state || activity.assets)) {
+          let iconUrl = null;
+          if (activity.assets?.large_image) {
+            if (activity.assets.large_image.startsWith('mp:external/')) {
+              iconUrl = `https://media.discordapp.net/${activity.assets.large_image.replace('mp:', '')}`;
+            } else if (activity.assets.large_image.startsWith('https://')) {
+              iconUrl = activity.assets.large_image;
+            } else {
+              iconUrl = `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets.large_image}.png`;
+            }
+          }
+          otherActivity = {
+            id: activity.id || null,
+            name: activity.name || 'Unknown Activity',
+            details: activity.details || '',
+            state: activity.state || '',
+            icon_url: iconUrl
+          };
         }
       }
 
       const musicData = spotify || tidal;
       const musicSource = spotify ? 'Spotify' : tidal ? 'Tidal' : null;
       const newTrackId = musicData ? musicData.track_id : null;
+      const newActivityId = otherActivity ? otherActivity.id : null;
 
       if (newTrackId !== currentTrackId || elements.musicContent.classList.contains('hidden')) {
         currentTrackId = newTrackId;
         updateMusicDisplay(musicData, discord_status, avatarUrl, musicSource);
+      }
+
+      if (newActivityId !== currentActivityId || elements.activityContent.classList.contains('hidden')) {
+        currentActivityId = newActivityId;
+        updateActivityDisplay(otherActivity);
       }
     } else {
       if (currentTrackId !== null || elements.musicContent.classList.contains('hidden')) {
         currentTrackId = null;
         updateMusicDisplay(null, null, null, null);
       }
+      if (currentActivityId !== null || elements.activityContent.classList.contains('hidden')) {
+        currentActivityId = null;
+        updateActivityDisplay(null);
+      }
     }
   } catch (error) {
-    console.error('Error fetching music data:', error);
+    console.error('Error fetching data:', error);
     if (elements.statusMessage.textContent !== 'Failed to load music data. Please try again later.' || elements.musicContent.classList.contains('hidden')) {
       elements.albumArt.classList.add('hidden');
       elements.songTitle.textContent = '';
@@ -237,8 +313,19 @@ async function fetchMusicData() {
       elements.profilePic.src = 'https://via.placeholder.com/200';
       elements.musicContent.classList.remove('hidden');
     }
+    if (elements.activityStatusMessage.textContent !== 'Failed to load activity data. Please try again later.' || elements.activityContent.classList.contains('hidden')) {
+      elements.activityIcon.classList.add('hidden');
+      elements.activityName.textContent = '';
+      elements.activityDetails.textContent = '';
+      elements.activityState.textContent = '';
+      elements.activityStatusMessage.textContent = 'Failed to load activity data. Please try again later.';
+      elements.activityTextContent.classList.add('text-center');
+      elements.activityTextContent.classList.remove('md:items-start', 'text-left');
+      elements.activityContent.classList.remove('hidden');
+    }
   } finally {
     elements.loadingSpinner.classList.add('hidden');
+    elements.activityLoadingSpinner.classList.add('hidden');
   }
 }
 

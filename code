@@ -1,1 +1,186 @@
-loadstring(game:HttpGet("https://github.com/DocYogurt/Reincarnation/raw/refs/heads/main/Scripts/Pressure"))()
+--[[
+    ╔══════════════════════════════════════╗
+    ║              迷子脚本                 ║
+    ║  Author: DX                          ║
+    ║  Version: 1.0                        ║
+    ║  Last Updated: July 20, 2025         ║
+    ╚══════════════════════════════════════╝
+]]
+
+-- Attempt to load AkaliNotif library with fallback
+local Notify
+local success, result = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Kinlei/Dynissimo/main/Scripts/AkaliNotif.lua", true))()
+end)
+if success and result and result.Notify then
+    Notify = result.Notify
+else
+    warn("[ERROR] Failed to load AkaliNotif library: " .. tostring(result))
+end
+
+-- Logger module with Akali notifications and console fallback
+local Logger = {}
+Logger.__index = Logger
+
+function Logger.new()
+    local self = setmetatable({}, Logger)
+    return self
+end
+
+function Logger:info(message)
+    local formatted = string.format("[INFO] [%s] %s", os.date("%Y-%m-%d %H:%M:%S"), message)
+    if Notify then
+        Notify({
+            Description = formatted,
+            Title = "Info",
+            Duration = 5
+        })
+    else
+        print(formatted)
+    end
+end
+
+function Logger:warn(message)
+    local formatted = string.format("[WARNING] [%s] %s", os.date("%Y-%m-%d %H:%M:%S"), message)
+    if Notify then
+        Notify({
+            Description = formatted,
+            Title = "Warning",
+            Duration = 5
+        })
+    else
+        warn(formatted)
+    end
+end
+
+function Logger:error(message)
+    local formatted = string.format("[ERROR] [%s] %s", os.date("%Y-%m-%d %H:%M:%S"), message)
+    if Notify then
+        Notify({
+            Description = formatted,
+            Title = "Error",
+            Duration = 7 -- Longer duration for errors
+        })
+    else
+        warn(formatted)
+    end
+end
+
+-- HTTP Client module for robust requests
+local HttpClient = {}
+HttpClient.__index = HttpClient
+
+function HttpClient.new(logger)
+    local self = setmetatable({ logger = logger }, HttpClient)
+    return self
+end
+
+function HttpClient:get(url)
+    local attempts = 3
+    local response
+    for i = 1, attempts do
+        local success, result = pcall(function()
+            return game:HttpGet(url, true)
+        end)
+        if success and result and result:gsub("\n", ""):gsub("\t", ""):gsub("\r", ""):gsub(" ", "") ~= "" then
+            response = result
+            break
+        end
+        self.logger:warn(string.format("HTTP GET attempt %d failed for %s: %s", i, url, result or "Empty response"))
+        task.wait(1)
+    end
+    if not response then
+        self.logger:error(string.format("Failed to fetch URL after %d attempts: %s", attempts, url))
+        return nil
+    end
+    return response
+end
+
+-- Script Loader module
+local ScriptLoader = {}
+ScriptLoader.__index = ScriptLoader
+
+function ScriptLoader.new()
+    local logger = Logger.new()
+    local self = setmetatable({
+        logger = logger,
+        http = HttpClient.new(logger),
+        gameScripts = {
+            [12552538292] = {
+                name = "Pressure",
+                url = "https://raw.githubusercontent.com/DocYogurt/Reincarnation/main/Scripts/Pressure"
+            },
+        }
+    }, ScriptLoader)
+    return self
+end
+
+-- Validate script configuration
+function ScriptLoader:validateConfig()
+    for placeId, info in pairs(self.gameScripts) do
+        if not info.name or not info.url then
+            self.logger:error(string.format("Invalid configuration for PlaceId %d: Missing name or URL", placeId))
+            return false
+        end
+        if type(info.url) ~= "string" or not info.url:match("^https?://") then
+            self.logger:error(string.format("Invalid URL for %s (PlaceId: %d)", info.name or "Unknown", placeId))
+            return false
+        end
+    end
+    return true
+end
+
+-- Load and execute a script from a URL
+function ScriptLoader:loadScript(url, gameName)
+    local response = self.http:get(url)
+    if not response then
+        self.logger:error(string.format("Failed to fetch script for %s: %s", gameName, url))
+        return false
+    end
+    local success, compiled = pcall(loadstring, response)
+    if not success then
+        self.logger:error(string.format("Failed to compile script for %s: %s", gameName, compiled))
+        return false
+    end
+    local scriptSuccess, scriptError = pcall(compiled)
+    if scriptSuccess then
+        self.logger:info(string.format("Successfully loaded script for %s", gameName))
+        return true
+    else
+        self.logger:error(string.format("Failed to execute script for %s: %s", gameName, scriptError))
+        return false
+    end
+end
+
+-- Main execution logic
+function ScriptLoader:run()
+    self.logger:info("Initializing Lost Script Loader...")
+    
+    if not self:validateConfig() then
+        self.logger:error("Configuration validation failed. Aborting.")
+        return
+    end
+
+    local currentPlaceId = game.PlaceId
+    local scriptInfo = self.gameScripts[currentPlaceId]
+
+    if scriptInfo then
+        self.logger:info(string.format("Detected game: %s (PlaceId: %d)", scriptInfo.name, currentPlaceId))
+        self:loadScript(scriptInfo.url, scriptInfo.name)
+    else
+        self.logger:warn(string.format("No script found for PlaceId: %d", currentPlaceId))
+    end
+end
+
+-- Main execution with error handling
+local function main()
+    local loader = ScriptLoader.new()
+    local success, errorMsg = pcall(function()
+        loader:run()
+    end)
+    if not success then
+        loader.logger:error(string.format("Script loader failed: %s", errorMsg))
+    end
+end
+
+main()

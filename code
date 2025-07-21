@@ -3,7 +3,7 @@
     ║              迷子脚本                 ║
     ║  Author: DX                          ║
     ║  Version: 1.0                        ║
-    ║  Last Updated: July 20, 2025         ║
+    ║  Last Updated: July 21, 2025         ║
     ╚══════════════════════════════════════╝
 ]]
 
@@ -110,6 +110,10 @@ function ScriptLoader.new()
                 name = "Pressure",
                 url = "https://raw.githubusercontent.com/DocYogurt/Reincarnation/main/Scripts/Pressure"
             },
+            [12411473842] = {
+                name = "Pressure_Lobby",
+                url = "https://raw.githubusercontent.com/DocYogurt/Reincarnation/main/Scripts/Pressure_Lobby"
+            }
         }
     }, ScriptLoader)
     return self

@@ -123,7 +123,36 @@
             align-items: center;
             justify-content: center;
             gap: 1rem;
+            flex-wrap: wrap; /* Allows content to wrap if needed on smaller screens */
         }
+        .top-box img {
+            width: 100px; /* Base width for larger screens */
+            height: 100px; /* Base height for larger screens */
+            object-fit: cover;
+            border-radius: 12px;
+            max-width: 25vw; /* Responsive max-width based on viewport width */
+            min-width: 60px; /* Minimum width to prevent it from getting too small */
+            max-height: 25vw; /* Responsive max-height based on viewport height */
+            min-height: 60px; /* Minimum height to prevent it from getting too small */
+        }
+
+        /* Adjust for smaller screens */
+        @media (max-width: 640px) {
+            .top-box img {
+                width: 80px; /* Slightly smaller base size for mobile */
+                height: 80px;
+                max-width: 20vw; /* Slightly smaller max-width for mobile */
+                max-height: 20vw; /* Slightly smaller max-height for mobile */
+            }
+        }
+
+        /* Adjust for larger screens */
+        @media (min-width: 1024px) {
+            .top-box img {
+                width: 120px; /* Larger base size for desktop */
+                height: 120px;
+            }
+}
         .bottom-box {
             display: flex;
             justify-content: center;
@@ -153,7 +182,6 @@
         .top-box .text-content .small-text-container {
             display: flex;
             align-items: center;
-            justify: flex-start;
             gap: 0.5rem;
             font-size: 1.5rem;
             line-height: 1.4;

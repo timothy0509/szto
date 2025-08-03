@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTR ETA Search</title>
+    <!-- Tailwind CSS for utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Font - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General Body and Font Styles */
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            gap: 1.5rem;
+            padding-bottom: 2rem;
+            color: #ffffff;
+        }
+
+        /* Main Title Styling */
+        .welcome-title {
+            font-size: 4rem;
+            font-weight: bold;
+            text-align: center;
+            background: linear-gradient(90deg, #a78bfa, #818cf8, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+            line-height: 1;
+            padding-top: 5rem;
+            opacity: 0;
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+            transform: translateY(20px);
+        }
+        .welcome-title.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Title Adjustments */
+        @media (min-width: 768px) {
+            .welcome-title { font-size: 5rem; }
+        }
+        @media (min-width: 1024px) {
+            .welcome-title { font-size: 6rem; }
+        }
+
+        /* Acrylic Box Styling for Search and Results */
+        .acrylic-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        /* Search Bar Styling */
+        .search-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .search-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #818cf8;
+            box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.5);
+        }
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Search Results Styling */
+        .search-results {
+            position: relative;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        .search-results-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .search-results-item:last-child {
+            border-bottom: none;
+        }
+        .search-results-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Station ETA Display Styling */
+        .station-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+        .station-card h4 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .eta-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .eta-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+        .eta-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Line colors for the text */
+        .line-AEL { color: #87929a; }
+        .line-TCL { color: #f47920; }
+        .line-TML { color: #b3391b; }
+        .line-TKL { color: #7f358f; }
+        .line-EAL { color: #169e54; }
+        .line-SIL { color: #b9d7e5; }
+        .line-TWL { color: #ec052e; }
+        .line-ISL { color: #0076a9; }
+        .line-KTL { color: #88c049; }
+        .line-DRL { color: #d687b8; }
+
+        /* Loader */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 640px) {
+            .welcome-title { font-size: 3rem; padding-top: 6rem; }
+        }
+
+        /* Custom Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* For Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2);
+        }
+
+        /* Custom Language Selector Styling */
+        .language-selector-container {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 20;
+        }
+        .custom-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-button {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: #ffffff;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em;
+            padding-right: 2.5rem;
+            transition: all 0.3s ease;
+        }
+        .dropdown-button:hover {
+            border-color: #a78bfa;
+            box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            min-width: 120px;
+            z-index: 30;
+        }
+        .dropdown-content a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: background-color 0.2s ease;
+        }
+        .dropdown-content a:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .dropdown-content.active {
+            display: block;
+        }
+        @media (max-width: 640px) {
+            .language-selector-container {
+                top: 1rem;
+                right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="language-selector-container">
+        <div class="custom-dropdown">
+            <button id="dropdown-button" class="dropdown-button">English</button>
+            <div id="dropdown-content" class="dropdown-content">
+                <a href="#" data-lang="en">English</a>
+                <a href="#" data-lang="zh">繁體中文</a>
+                <a href="#" data-lang="zh_Hans">简体中文</a>
+                <a href="#" data-lang="ja">日本語</a>
+            </div>
+        </div>
+    </div>
+    
+    <h1 class="welcome-title" id="page-title">MTR ETA Search</h1>
+
+    <div class="search-container acrylic-box flex flex-col items-center">
+        <input type="text" id="station-search" class="search-input" placeholder="Search for a station..." />
+        <div id="search-results" class="search-results"></div>
+    </div>
+    
+    <div id="mtr-data-container" class="acrylic-box rounded-xl text-center">
+        <p id="initial-message" class="opacity-70">Please search for a station to view its arrival times.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mtrApiUrl = 'https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php';
+            const mtrDataContainer = document.getElementById('mtr-data-container');
+            const searchInput = document.getElementById('station-search');
+            const searchResultsContainer = document.getElementById('search-results');
+            const dropdownButton = document.getElementById('dropdown-button');
+            const dropdownContent = document.getElementById('dropdown-content');
+
+            let currentRefreshInterval = null;
+            let selectedStation = null;
+            let currentLanguage = 'en';
+            let stations = [];
+
+            // Translations for key UI text
+            const translations = {
+                en: {
+                    dropdown: 'English',
+                    title: 'MTR ETA Search',
+                    placeholder: 'Search for a station...',
+                    initialMessage: 'Please search for a station to view its arrival times.',
+                    noData: 'No data available for this station. The line may not be in operation or there are no trains coming soon.',
+                    upTrains: 'Up Trains',
+                    downTrains: 'Down Trains',
+                    to: 'To',
+                    min: 'min',
+                    plat: 'Plat'
+                },
+                zh: {
+                    dropdown: '简体中文',
+                    title: '港鐵到站時間查詢',
+                    placeholder: '搜尋車站...',
+                    initialMessage: '請搜尋車站以查看其到站時間。',
+                    noData: '此車站暫無到站時間資訊。該線路可能已停止運營或沒有即將到來的列車。',
+                    upTrains: '上行列車',
+                    downTrains: '下行列車',
+                    to: '往',
+                    min: '分鐘',
+                    plat: '月台'
+                },
+                zh_Hans: {
+                    dropdown: '繁體中文',
+                    title: '港铁到站时间查询',
+                    placeholder: '搜索车站...',
+                    initialMessage: '请搜索车站以查看其到站时间。',
+                    noData: '此车站暂无到站时间信息。该线路可能已停止运营或没有即将到来的列车。',
+                    upTrains: '上行列車',
+                    downTrains: '下行列車',
+                    to: '往',
+                    min: '分钟',
+                    plat: '站台'
+                },
+                ja: {
+                    dropdown: '日本語',
+                    title: 'MTR 到着時間検索',
+                    placeholder: '駅を検索...',
+                    initialMessage: '駅を検索して到着時間を確認してください。',
+                    noData: 'この駅の情報は利用できません。路線が運行していないか、まもなく到着する電車がない可能性があります。',
+                    upTrains: '上り電車',
+                    downTrains: '下り電車',
+                    to: '行き',
+                    min: '分',
+                    plat: '番線'
+                }
+            };
+            
+            // Station map (unchanged)
+            const stationMap = {
+                'HOK': { name_en: 'Hong Kong', name_zh: '香港', name_zh_Hans: '香港', name_ja: '香港', lines: ['AEL', 'TCL'] },
+                'KOW': { name_en: 'Kowloon', name_zh: '九龍', name_zh_Hans: '九龙', name_ja: '九龍', lines: ['AEL', 'TCL'] },
+                'TSU': { name_en: 'Tsing Yi', name_zh: '青衣', name_zh_Hans: '青衣', name_ja: '青衣', lines: ['AEL'] },
+                'AIR': { name_en: 'Airport', name_zh: '機場', name_zh_Hans: '机场', name_ja: '空港', lines: ['AEL'] },
+                'AWE': { name_en: 'AsiaWorld-Expo', name_zh: '亞洲國際博覽館', name_zh_Hans: '亚洲国际博览馆', name_ja: 'アジアワールド・エキスポ', lines: ['AEL'] },
+                'TSY': { name_en: 'Tsing Yi', name_zh: '青衣', name_zh_Hans: '青衣', name_ja: '青衣', lines: ['TCL'] },
+                'LAK': { name_en: 'Lai King', name_zh: '荔景', name_zh_Hans: '荔景', name_ja: '茘景', lines: ['TCL', 'TWL'] }, 
+                'NAM': { name_en: 'Nam Cheong', name_zh: '南昌', name_zh_Hans: '南昌', name_ja: '南昌', lines: ['TCL', 'TML'] },
+                'OLY': { name_en: 'Olympic', name_zh: '奧運', name_zh_Hans: '奥运', name_ja: 'オリンピック', lines: ['TCL'] },
+                'SUN': { name_en: 'Sunny Bay', name_zh: '欣澳', name_zh_Hans: '欣澳', name_ja: '欣澳', lines: ['TCL', 'DRL'] },
+                'TUC': { name_en: 'Tung Chung', name_zh: '東涌', name_zh_Hans: '东涌', name_ja: '東涌', lines: ['TCL'] },
+                'TUM': { name_en: 'Tuen Mun', name_zh: '屯門', name_zh_Hans: '屯门', name_ja: '屯門', lines: ['TML'] },
+                'SIH': { name_en: 'Siu Hong', name_zh: '兆康', name_zh_Hans: '兆康', name_ja: '兆康', lines: ['TML'] },
+                'TIS': { name_en: 'Tin Shui Wai', name_zh: '天水圍', name_zh_Hans: '天水围', name_ja: '天水囲', lines: ['TML'] },
+                'LOP': { name_en: 'Long Ping', name_zh: '朗屏', name_zh_Hans: '朗屏', name_ja: '朗屏', lines: ['TML'] },
+                'YUL': { name_en: 'Yuen Long', name_zh: '元朗', name_zh_Hans: '元朗', name_ja: '元朗', lines: ['TML'] },
+                'KSR': { name_en: 'Kam Sheung Road', name_zh: '錦上路', name_zh_Hans: '锦上路', name_ja: '錦上路', lines: ['TML'] },
+                'TWW': { name_en: 'Tsuen Wan West', name_zh: '荃灣西', name_zh_Hans: '荃湾西', name_ja: '荃灣西', lines: ['TML'] },
+                'MEF': { name_en: 'Mei Foo', name_zh: '美孚', name_zh_Hans: '美孚', name_ja: '美孚', lines: ['TML', 'TWL'] },
+                'NAC': { name_en: 'Nam Cheong', name_zh: '南昌', name_zh_Hans: '南昌', name_ja: '南昌', lines: ['TML', 'TCL'] },
+                'AUS': { name_en: 'Austin', name_zh: '柯士甸', name_zh_Hans: '柯士甸', name_ja: 'オースティン', lines: ['TML'] },
+                'ETS': { name_en: 'East Tsim Sha Tsui', name_zh: '尖東', name_zh_Hans: '尖东', name_ja: '尖東', lines: ['TML'] },
+                'HUH': { name_en: 'Hung Hom', name_zh: '紅磡', name_zh_Hans: '红磡', name_ja: '紅磡', lines: ['TML', 'EAL'] },
+                'HOM': { name_en: 'Ho Man Tin', name_zh: '何文田', name_zh_Hans: '何文田', name_ja: '何文田', lines: ['TML', 'KTL'] },
+                'TKW': { name_en: 'To Kwa Wan', name_zh: '土瓜灣', name_zh_Hans: '土瓜湾', name_ja: '土瓜湾', lines: ['TML'] },
+                'SUW': { name_en: 'Sung Wong Toi', name_zh: '宋皇臺', name_zh_Hans: '宋皇台', name_ja: '宋皇台', lines: ['TML'] },
+                'KAT': { name_en: 'Kai Tak', name_zh: '啟德', name_zh_Hans: '启德', name_ja: '啓徳', lines: ['TML'] },
+                'DIH': { name_en: 'Diamond Hill', name_zh: '鑽石山', name_zh_Hans: '钻石山', name_ja: '鑽石山', lines: ['TML', 'KTL'] },
+                'HIK': { name_en: 'Hin Keng', name_zh: '顯徑', name_zh_Hans: '显径', name_ja: '顕径', lines: ['TML'] },
+                'TAW': { name_en: 'Tai Wai', name_zh: '大圍', name_zh_Hans: '大围', name_ja: '大囲', lines: ['TML', 'EAL'] },
+                'CKT': { name_en: 'Che Kung Temple', name_zh: '車公廟', name_zh_Hans: '车公庙', name_ja: '車公廟', lines: ['TML'] },
+                'STW': { name_en: 'Sha Tin Wai', name_zh: '沙田圍', name_zh_Hans: '沙田围', name_ja: '沙田囲', lines: ['TML'] },
+                'WKS': { name_en: 'Wu Kai Sha', name_zh: '烏溪沙', name_zh_Hans: '乌溪沙', name_ja: '烏溪沙', lines: ['TML'] },
+                'MOS': { name_en: 'Ma On Shan', name_zh: '馬鞍山', name_zh_Hans: '马鞍山', name_ja: '馬鞍山', lines: ['TML'] },
+                'HEO': { name_en: 'Heng On', name_zh: '恆安', name_zh_Hans: '恒安', name_ja: '恒安', lines: ['TML'] },
+                'TSH': { name_en: 'Tai Shui Hang', name_zh: '大水坑', name_zh_Hans: '大水坑', name_ja: '大水坑', lines: ['TML'] },
+                'SHM': { name_en: 'Shek Mun', name_zh: '石門', name_zh_Hans: '石门', name_ja: '石門', lines: ['TML'] },
+                'CIO': { name_en: 'City One', name_zh: '第一城', name_zh_Hans: '第一城', name_ja: '第一城', lines: ['TML'] },
+                'SHT': { name_en: 'Sha Tin', name_zh: '沙田', name_zh_Hans: '沙田', name_ja: '沙田', lines: ['EAL'] },
+                'FOT': { name_en: 'Fo Tan', name_zh: '火炭', name_zh_Hans: '火炭', name_ja: '火炭', lines: ['EAL'] },
+                'RAC': { name_en: 'Racecourse', name_zh: '馬場', name_zh_Hans: '马场', name_ja: '馬場', lines: ['EAL'] },
+                'UNI': { name_en: 'University', name_zh: '大學', name_zh_Hans: '大学', name_ja: '大学', lines: ['EAL'] },
+                'TAP': { name_en: 'Tai Po Market', name_zh: '大埔墟', name_zh_Hans: '大埔墟', name_ja: '大埔墟', lines: ['EAL'] },
+                'TWO': { name_en: 'Tai Wo', name_zh: '太和', name_zh_Hans: '太和', name_ja: '太和', lines: ['EAL'] },
+                'FAN': { name_en: 'Fanling', name_zh: '粉嶺', name_zh_Hans: '粉岭', name_ja: '粉嶺', lines: ['EAL'] },
+                'SHS': { name_en: 'Sheung Shui', name_zh: '上水', name_zh_Hans: '上水', name_ja: '上水', lines: ['EAL'] },
+                'LOW': { name_en: 'Lo Wu', name_zh: '羅湖', name_zh_Hans: '罗湖', name_ja: '羅湖', lines: ['EAL'] },
+                'LMC': { name_en: 'Lok Ma Chau', name_zh: '落馬洲', name_zh_Hans: '落马洲', name_ja: '落馬洲', lines: ['EAL'] },
+                'ADM': { name_en: 'Admiralty', name_zh: '金鐘', name_zh_Hans: '金钟', name_ja: '金鐘', lines: ['EAL', 'ISL', 'SIL', 'TWL'] },
+                'EXC': { name_en: 'Exhibition Centre', name_zh: '會展', name_zh_Hans: '会展', name_ja: 'エキシビジョンセンター', lines: ['EAL'] },
+                'MKK': { name_en: 'Mong Kok East', name_zh: '旺角東', name_zh_Hans: '旺角东', name_ja: '旺角東', lines: ['EAL'] },
+                'CEN': { name_en: 'Central', name_zh: '中環', name_zh_Hans: '中环', name_ja: '中環', lines: ['ISL', 'TWL'] },
+                'KET': { name_en: 'Kennedy Town', name_zh: '堅尼地城', name_zh_Hans: '坚尼地城', name_ja: '堅尼地城', lines: ['ISL'] },
+                'HKU': { name_en: 'HKU', name_zh: '香港大學', name_zh_Hans: '香港大学', name_ja: '香港大学', lines: ['ISL'] },
+                'SYP': { name_en: 'Sai Ying Pun', name_zh: '西營盤', name_zh_Hans: '西营盘', name_ja: '西營盤', lines: ['ISL'] },
+                'SHW': { name_en: 'Sheung Wan', name_zh: '上環', name_zh_Hans: '上环', name_ja: '上環', lines: ['ISL'] },
+                'WAC': { name_en: 'Wan Chai', name_zh: '灣仔', name_zh_Hans: '湾仔', name_ja: '灣仔', lines: ['ISL'] },
+                'CAB': { name_en: 'Causeway Bay', name_zh: '銅鑼灣', name_zh_Hans: '铜锣湾', name_ja: '銅鑼灣', lines: ['ISL'] },
+                'TIH': { name_en: 'Tin Hau', name_zh: '天后', name_zh_Hans: '天后', name_ja: '天后', lines: ['ISL'] },
+                'FOH': { name_en: 'Fortress Hill', name_zh: '炮台山', name_zh_Hans: '炮台山', name_ja: '炮台山', lines: ['ISL'] },
+                'NOP': { name_en: 'North Point', name_zh: '北角', name_zh_Hans: '北角', name_ja: '北角', lines: ['ISL', 'TKL'] },
+                'QUB': { name_en: 'Quarry Bay', name_zh: '鰂魚涌', name_zh_Hans: '鲗鱼涌', name_ja: '鰂魚涌', lines: ['ISL', 'TKL'] },
+                'TAK': { name_en: 'Tai Koo', name_zh: '太古', name_zh_Hans: '太古', name_ja: '太古', lines: ['ISL'] },
+                'SWH': { name_en: 'Sai Wan Ho', name_zh: '西灣河', name_zh_Hans: '西湾河', name_ja: '西灣河', lines: ['ISL'] },
+                'SKW': { name_en: 'Shau Kei Wan', name_zh: '筲箕灣', name_zh_Hans: '筲箕湾', name_ja: '筲箕湾', lines: ['ISL'] },
+                'HFC': { name_en: 'Heng Fa Chuen', name_zh: '杏花邨', name_zh_Hans: '杏花邨', name_ja: '杏花邨', lines: ['ISL'] },
+                'CHW': { name_en: 'Chai Wan', name_zh: '柴灣', name_zh_Hans: '柴湾', name_ja: '柴灣', lines: ['ISL'] },
+                'OCP': { name_en: 'Ocean Park', name_zh: '海洋公園', name_zh_Hans: '海洋公园', name_ja: '海洋公園', lines: ['SIL'] },
+                'WCH': { name_en: 'Wong Chuk Hang', name_zh: '黃竹坑', name_zh_Hans: '黄竹坑', name_ja: '黄竹坑', lines: ['SIL'] },
+                'LET': { name_en: 'Lei Tung', name_zh: '利東', name_zh_Hans: '利东', name_ja: '利東', lines: ['SIL'] },
+                'SOH': { name_en: 'South Horizons', name_zh: '海怡半島', name_zh_Hans: '海怡半岛', name_ja: '海怡半島', lines: ['SIL'] },
+                'TSW': { name_en: 'Tsuen Wan', name_zh: '荃灣', name_zh_Hans: '荃湾', name_ja: '荃灣', lines: ['TWL'] },
+                'TWH': { name_en: 'Tai Wo Hau', name_zh: '大窩口', name_zh_Hans: '大窝口', name_ja: '大窩口', lines: ['TWL'] },
+                'KWH': { name_en: 'Kwai Hing', name_zh: '葵興', name_zh_Hans: '葵兴', name_ja: '葵興', lines: ['TWL'] },
+                'KWF': { name_en: 'Kwai Fong', name_zh: '葵芳', name_zh_Hans: '葵芳', name_ja: '葵芳', lines: ['TWL'] },
+                'LCK': { name_en: 'Lai Chi Kok', name_zh: '荔枝角', name_zh_Hans: '荔枝角', name_ja: '茘枝角', lines: ['TWL'] },
+                'CSW': { name_en: 'Cheung Sha Wan', name_zh: '長沙灣', name_zh_Hans: '长沙湾', name_ja: '長沙湾', lines: ['TWL'] },
+                'SSP': { name_en: 'Sham Shui Po', name_zh: '深水埗', name_zh_Hans: '深水埗', name_ja: '深水埗', lines: ['TWL'] },
+                'PRE': { name_en: 'Prince Edward', name_zh: '太子', name_zh_Hans: '太子', name_ja: '太子', lines: ['TWL', 'KTL'] },
+                'MOK': { name_en: 'Mong Kok', name_zh: '旺角', name_zh_Hans: '旺角', name_ja: '旺角', lines: ['TWL', 'KTL'] },
+                'YMT': { name_en: 'Yau Ma Tei', name_zh: '油麻地', name_zh_Hans: '油麻地', name_ja: '油麻地', lines: ['TWL', 'KTL'] },
+                'JOR': { name_en: 'Jordan', name_zh: '佐敦', name_zh_Hans: '佐敦', name_ja: '佐敦', lines: ['TWL'] },
+                'TST': { name_en: 'Tsim Sha Tsui', name_zh: '尖沙咀', name_zh_Hans: '尖沙咀', name_ja: '尖沙咀', lines: ['TWL'] },
+                'WHA': { name_en: 'Whampoa', name_zh: '黃埔', name_zh_Hans: '黄埔', name_ja: '黄埔', lines: ['KTL'] },
+                'HOM': { name_en: 'Ho Man Tin', name_zh: '何文田', name_zh_Hans: '何文田', name_ja: '何文田', lines: ['KTL', 'TML'] },
+                'SKM': { name_en: 'Shek Kip Mei', name_zh: '石硤尾', name_zh_Hans: '石硖尾', name_ja: '石硤尾', lines: ['KTL'] },
+                'KOT': { name_en: 'Kowloon Tong', name_zh: '九龍塘', name_zh_Hans: '九龙塘', name_ja: '九龍塘', lines: ['KTL', 'EAL'] },
+                'LOF': { name_en: 'Lok Fu', name_zh: '樂富', name_zh_Hans: '乐富', name_ja: '楽富', lines: ['KTL'] },
+                'WTS': { name_en: 'Wong Tai Sin', name_zh: '黃大仙', name_zh_Hans: '黄大仙', name_ja: '黄大仙', lines: ['KTL'] },
+                'CHH': { name_en: 'Choi Hung', name_zh: '彩虹', name_zh_Hans: '彩虹', name_ja: '彩虹', lines: ['KTL'] },
+                'KOB': { name_en: 'Kowloon Bay', name_zh: '九龍灣', name_zh_Hans: '九龙湾', name_ja: '九龍灣', lines: ['KTL'] },
+                'NTK': { name_en: 'Ngau Tau Kok', name_zh: '牛頭角', name_zh_Hans: '牛头角', name_ja: '牛頭角', lines: ['KTL'] },
+                'KWT': { name_en: 'Kwun Tong', name_zh: '觀塘', name_zh_Hans: '观塘', name_ja: '観塘', lines: ['KTL'] },
+                'LAT': { name_en: 'Lam Tin', name_zh: '藍田', name_zh_Hans: '蓝田', name_ja: '藍田', lines: ['KTL'] },
+                'YAT': { name_en: 'Yau Tong', name_zh: '油塘', name_zh_Hans: '油塘', name_ja: '油塘', lines: ['KTL', 'TKL'] },
+                'TIK': { name_en: 'Tiu Keng Leng', name_zh: '調景嶺', name_zh_Hans: '调景岭', name_ja: '調景嶺', lines: ['KTL', 'TKL'] },
+                'LHP': { name_en: 'LOHAS Park', name_zh: '康城', name_zh_Hans: '康城', name_ja: '康城', lines: ['TKL'] },
+                'POA': { name_en: 'Po Lam', name_zh: '寶琳', name_zh_Hans: '宝琳', name_ja: '宝琳', lines: ['TKL'] },
+                'TKO': { name_en: 'Tseung Kwan O', name_zh: '將軍澳', name_zh_Hans: '将军澳', name_ja: '將軍澳', lines: ['TKL'] },
+                'HAH': { name_en: 'Hang Hau', name_zh: '坑口', name_zh_Hans: '坑口', name_ja: '坑口', lines: ['TKL'] },
+                'DIS': { name_en: 'Disneyland Resort', name_zh: '迪士尼', name_zh_Hans: '迪士尼', name_ja: 'ディズニーランド・リゾート', lines: ['DRL'] }
+            };
+
+            const updateSearchStations = () => {
+                stations = [];
+                for (const code in stationMap) {
+                    const station = stationMap[code];
+                    const name_en = station.name_en;
+                    const name_zh = station.name_zh;
+                    const name_zh_Hans = station.name_zh_Hans;
+                    const name_ja = station.name_ja;
+                    station.lines.forEach(line => {
+                        stations.push({
+                            code: code,
+                            name_en: name_en,
+                            name_zh: name_zh,
+                            name_zh_Hans: name_zh_Hans,
+                            name_ja: name_ja,
+                            line: line
+                        });
+                    });
+                }
+            };
+
+            const setLanguage = (lang) => {
+                currentLanguage = lang;
+                localStorage.setItem('languagePreference', lang);
+                updateSearchStations();
+                document.getElementById('page-title').textContent = translations[lang].title;
+                searchInput.placeholder = translations[lang].placeholder;
+                dropdownButton.textContent = translations[lang].dropdown;
+                if (selectedStation) {
+                    const stationInfo = stationMap[selectedStation.code];
+                    selectedStation.name_en = stationInfo.name_en;
+                    selectedStation.name_zh = stationInfo.name_zh;
+                    selectedStation.name_zh_Hans = stationInfo.name_zh_Hans;
+                    selectedStation.name_ja = stationInfo.name_ja;
+                    fetchAndRenderSingleStationData(selectedStation.code, selectedStation.line);
+                } else {
+                    document.getElementById('initial-message').textContent = translations[lang].initialMessage;
+                }
+            };
+
+            const fetchAndRenderSingleStationData = async (stationCode, lineCode) => {
+                if (!stationCode || !lineCode) {
+                    mtrDataContainer.innerHTML = `<p class="opacity-70" id="initial-message">${translations[currentLanguage].initialMessage}</p>`;
+                    return;
+                }
+
+                mtrDataContainer.innerHTML = `<div class="loader"></div>`;
+
+                try {
+                    const url = `${mtrApiUrl}?line=${lineCode}&sta=${stationCode}`;
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const etaData = await response.json();
+                    const stationDataKey = `${lineCode}-${stationCode}`;
+                    const lineStationData = etaData.data[stationDataKey];
+                    const stationName = stationMap[stationCode][`name_${currentLanguage}`] || stationMap[stationCode].name_en;
+
+                    let stationHtml = `
+                        <div class="station-card">
+                            <h4 class="line-${lineCode}">${stationName} (${lineCode})</h4>
+                            <div class="eta-list">
+                    `;
+                    let hasData = false;
+
+                    if (lineStationData && lineStationData.UP && lineStationData.UP.length > 0) {
+                        hasData = true;
+                        stationHtml += `<h5 class="font-bold mt-2 mb-1">${translations[currentLanguage].upTrains}</h5>`;
+                        lineStationData.UP.forEach(train => {
+                            let destinationStation = stationMap[train.dest];
+                            if (destinationStation) {
+                                let destinationName = destinationStation[`name_${currentLanguage}`] || destinationStation.name_en;
+                                let arrivalText = train.ttnt ? `${train.ttnt} ${translations[currentLanguage].min}` : (train.tnt || 'N/A');
+                                stationHtml += `
+                                    <div class="eta-item">
+                                        <span>${translations[currentLanguage].to} ${destinationName}</span>
+                                        <span>${arrivalText} (${translations[currentLanguage].plat} ${train.plat})</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
+
+                    if (lineStationData && lineStationData.DOWN && lineStationData.DOWN.length > 0) {
+                        hasData = true;
+                        stationHtml += `<h5 class="font-bold mt-2 mb-1">${translations[currentLanguage].downTrains}</h5>`;
+                        lineStationData.DOWN.forEach(train => {
+                            let destinationStation = stationMap[train.dest];
+                            if (destinationStation) {
+                                let destinationName = destinationStation[`name_${currentLanguage}`] || destinationStation.name_en;
+                                let arrivalText = train.ttnt ? `${train.ttnt} ${translations[currentLanguage].min}` : (train.tnt || 'N/A');
+                                stationHtml += `
+                                    <div class="eta-item">
+                                        <span>${translations[currentLanguage].to} ${destinationName}</span>
+                                        <span>${arrivalText} (${translations[currentLanguage].plat} ${train.plat})</span>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
+
+                    if (!hasData) {
+                        stationHtml += `<p class="opacity-70">${translations[currentLanguage].noData}</p>`;
+                    }
+
+                    stationHtml += `
+                            </div>
+                        </div>
+                    `;
+
+                    mtrDataContainer.innerHTML = stationHtml;
+                } catch (error) {
+                    console.error('Error fetching MTR data:', error);
+                    mtrDataContainer.innerHTML = `<p class="text-red-400 text-center">Failed to load ETA data. Please try again later.</p>`;
+                }
+            };
+
+            const handleSearchInput = (e) => {
+                const query = e.target.value.trim().toLowerCase();
+                searchResultsContainer.innerHTML = '';
+
+                if (query.length < 2) {
+                    searchResultsContainer.style.display = 'none';
+                    return;
+                }
+
+                const uniqueStations = new Set();
+                const filteredStations = stations.filter(station => {
+                    const name_en = station.name_en.toLowerCase();
+                    const name_zh = station.name_zh.toLowerCase();
+                    const name_zh_Hans = station.name_zh_Hans.toLowerCase();
+                    const name_ja = station.name_ja.toLowerCase();
+                    const uniqueKey = `${station.name_en}-${station.line}`;
+                    if (
+                        name_en.includes(query) ||
+                        name_zh.includes(query) ||
+                        name_zh_Hans.includes(query) ||
+                        name_ja.includes(query)
+                    ) {
+                        if (!uniqueStations.has(uniqueKey)) {
+                            uniqueStations.add(uniqueKey);
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+
+                if (filteredStations.length > 0) {
+                    filteredStations.forEach(station => {
+                        const resultItem = document.createElement('div');
+                        resultItem.className = 'search-results-item';
+                        const displayName = station[`name_${currentLanguage}`] || station.name_en;
+                        resultItem.innerHTML = `${displayName} <span class="text-xs opacity-70">(${station.line})</span>`;
+                        resultItem.addEventListener('click', () => {
+                            selectedStation = station;
+                            fetchAndRenderSingleStationData(station.code, station.line);
+                            searchResultsContainer.style.display = 'none';
+                            searchInput.value = displayName;
+                            if (currentRefreshInterval) {
+                                clearInterval(currentRefreshInterval);
+                            }
+                            currentRefreshInterval = setInterval(() => {
+                                if (selectedStation) {
+                                    fetchAndRenderSingleStationData(selectedStation.code, selectedStation.line);
+                                }
+                            }, 10000);
+                        });
+                        searchResultsContainer.appendChild(resultItem);
+                    });
+                    searchResultsContainer.style.display = 'block';
+                } else {
+                    searchResultsContainer.style.display = 'none';
+                }
+            };
+
+            const handleSearchSubmit = () => {
+                const query = searchInput.value.trim().toLowerCase();
+                if (!query) {
+                    mtrDataContainer.innerHTML = `<p class="opacity-70" id="initial-message">${translations[currentLanguage].initialMessage}</p>`;
+                    return;
+                }
+
+                const matchedStation = stations.find(station => {
+                    return (
+                        station.name_en.toLowerCase() === query ||
+                        station.name_zh.toLowerCase() === query ||
+                        station.name_zh_Hans.toLowerCase() === query ||
+                        station.name_ja.toLowerCase() === query
+                    );
+                });
+
+                if (matchedStation) {
+                    selectedStation = matchedStation;
+                    const displayName = matchedStation[`name_${currentLanguage}`] || matchedStation.name_en;
+                    searchInput.value = displayName;
+                    fetchAndRenderSingleStationData(matchedStation.code, matchedStation.line);
+                    searchResultsContainer.style.display = 'none';
+                    if (currentRefreshInterval) {
+                        clearInterval(currentRefreshInterval);
+                    }
+                    currentRefreshInterval = setInterval(() => {
+                        if (selectedStation) {
+                            fetchAndRenderSingleStationData(selectedStation.code, selectedStation.line);
+                        }
+                    }, 10000);
+                } else {
+                    mtrDataContainer.innerHTML = `<p class="text-red-400 text-center">${translations[currentLanguage].noStation}</p>`;
+                    searchResultsContainer.style.display = 'none';
+                }
+            };
+
+            // Custom dropdown event listeners
+            dropdownButton.addEventListener('click', () => {
+                dropdownContent.classList.toggle('active');
+            });
+
+            dropdownContent.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const lang = e.target.getAttribute('data-lang');
+                    setLanguage(lang);
+                    dropdownContent.classList.remove('active');
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!dropdownContent.contains(e.target) && e.target !== dropdownButton) {
+                    dropdownContent.classList.remove('active');
+                }
+                if (!searchResultsContainer.contains(e.target) && e.target !== searchInput) {
+                    searchResultsContainer.style.display = 'none';
+                }
+            });
+
+            searchInput.addEventListener('input', handleSearchInput);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSearchSubmit();
+                }
+            });
+
+            const titles = document.querySelectorAll('.welcome-title');
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.5
+            };
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            titles.forEach(title => {
+                observer.observe(title);
+            });
+
+            const savedLanguage = localStorage.getItem('languagePreference');
+            if (savedLanguage) {
+                setLanguage(savedLanguage);
+            } else {
+                setLanguage('en');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Theme Acrylic Website</title>
+    <!-- Tailwind CSS for utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Font - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <script type="text/javascript" src="js/script.js"></script>
+<body>
+    <!-- Navbar with sticky effect -->
+    <nav class="navbar" id="mainNavbar">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <!-- Original Home Page Content -->
+    <h1 class="welcome-title" id="home">Welcome</h1>
+    <div class="acrylic-box top-box rounded-xl">
+        <img src="https://cdn.discordapp.com/avatars/511031197455876128/e90e97dc94f91dd9aa05a9ab4473d40c.png" alt="Profile Avatar" class="rounded-xl">
+        <div class="text-content">
+            <!-- User's name will be populated dynamically -->
+            <span class="title" id="userName">DXuwu</span>
+            <div class="small-text-container">
+                <!-- User's Discord tag will be populated dynamically -->
+                <span id="textToCopy" class="small-text">dxuwulol</span>
+                <button id="copyButton" class="copy-button" aria-label="Copy dxuwu">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <span id="copyMessage" class="copy-message">Copied!</span>
+            </div>
+            <!-- Discord profile link will be populated dynamically -->
+            <a id="discordProfileLink" href="#" class="link">Discord Profile</a>
+        </div>
+    </div>
+    <div class="acrylic-box bottom-box rounded-xl">
+        <div class="small-box rounded-xl">
+            <h2><i class="fas fa-desktop text-blue-300"></i> Device Status</h2>
+            <div id="device-status-content" class="status-content-area">
+                <div class="status-item">
+                    <span>Loading...</span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        <div class="right-box rounded-xl">
+            <h2><i class="fas fa-gamepad text-blue-300"></i> Activities</h2>
+            <div id="activities-content" class="activities-content-area">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <h2 class="welcome-title" id="about">About Me</h2>
+    <div class="acrylic-box rounded-xl about-content">
+        <p>Hello! I'm DXuwu, I love coding i guess and I like playing games</p>
+        <h3>Title</h3>
+        <ul>
+            I dont know what to put here 
+        </ul>
+    </div>
+    
+    <!-- Projects Section -->
+    <h2 class="welcome-title" id="projects">My Projects</h2>
+    <div class="acrylic-box rounded-xl">
+        <p class="mb-4">Here are some of the projects I've worked on</p>
+        <div class="relative projects-carousel-container flex items-center justify-between mx-auto">
+             <!-- Left Arrow Button -->
+            <button id="carousel-left" class="absolute left-0 sm:-left-8 top-1/2 -translate-y-1/2 bg-white/10 text-white p-2 sm:p-3 rounded-full z-10 hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <!-- Projects Carousel -->
+            <div class="carousel-wrapper">
+                <div id="projects-carousel" class="projects-carousel w-full flex-grow">
+                    <!-- Project Card 1 -->
+                    <div class="project-card-wrapper">
+                        <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 flex flex-col items-center text-center transition-transform hover:scale-105 duration-300 h-full">
+                            <img src="./img/main.png" alt="Project 1" class="w-full h-auto object-cover rounded-md mb-4">
+                            <h3 class="text-xl font-bold mb-2">szto.hkjc.uk</h3>
+                            <p class="text-gray-300 text-sm mb-4">My profile website, introducing stuff</p>
+                            <a href="#" class="bg-white/10 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white/20 transition-colors mt-auto">View Project</a>
+                        </div>
+                    </div>
+                    <!-- Project Card 2 -->
+                    <div class="project-card-wrapper">
+                        <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 flex flex-col items-center text-center transition-transform hover:scale-105 duration-300 h-full">
+                            <img src="./img/mtr.png" alt="Project 2" class="w-full h-auto object-cover rounded-md mb-4">
+                            <h3 class="text-xl font-bold mb-2">MTR ETA</h3>
+                            <p class="text-gray-300 text-sm mb-4">A website with searching system to check MTR arriving times.</p>
+                            <a href="./mtr.html" class="bg-white/10 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white/20 transition-colors mt-auto">View Project</a>
+                        </div>
+                    </div>
+                    <!-- Project Card 3 -->
+                    <div class="project-card-wrapper">
+                        <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 flex flex-col items-center text-center transition-transform hover:scale-105 duration-300 h-full">
+                            <img src="./img/oldver.png" alt="Project 3" class="w-full h-auto object-cover rounded-md mb-4">
+                            <h3 class="text-xl font-bold mb-2">Old Profile</h3>
+                            <p class="text-gray-300 text-sm mb-4">An older version of my profile website which i thought was a pretty cool idea</p>
+                            <a href="#" class="bg-white/10 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white/20 transition-colors mt-auto">View Project</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Right Arrow Button -->
+            <button id="carousel-right" class="absolute right-0 sm:-right-8 top-1/2 -translate-y-1/2 bg-white/10 text-white p-2 sm:p-3 rounded-full z-10 hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        <!-- Carousel Dots -->
+        <div id="carousel-dots" class="carousel-dots"></div>
+    </div>
+    
+    <!-- Contact Section -->
+    <h2 class="welcome-title" id="contact">Get in Touch</h2>
+    <div class="acrylic-box rounded-xl contact-content">
+        <p class="text-center">I'd love to hear from you! Feel free to reach out through any of the following channels:</p>
+        <div class="flex flex-col md:flex-row flex-wrap gap-2 justify-center items-center social-links">
+            <a href="mailto:uno@hkjc.uk" class="bg-white/10 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white/20 transition-colors mt-auto">Email</a>
+            <a href="github.com/dxinschool" class="bg-white/10 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white/20 transition-colors mt-auto">Github</a>
+            <a href="https://www.instagram.com/szto.hkjc.uk/" class="bg-white/10 text-white px-4 py-2 rounded-full flex items-center gap-2 hover:bg-white/20 transition-colors mt-auto">Instagram</a>
+        </div>
+    </div>
+</body>
+</html>

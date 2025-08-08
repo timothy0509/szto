@@ -118,6 +118,9 @@
             cursor: pointer;
             transition: background-color 0.2s ease;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .search-results-item:last-child {
             border-bottom: none;
@@ -126,37 +129,135 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Station ETA Display Styling */
-        .station-card {
+        /* --- NEW Station Info UI Styles --- */
+        .station-info-card {
             background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 1rem;
+            border-radius: 16px;
+            padding: 1.5rem;
             margin-top: 1.5rem;
         }
-        .station-card h4 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            text-align: center;
-        }
-        .eta-list {
+        .station-info-header {
             display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 1rem;
         }
-        .eta-item {
+        .station-info-header h4 {
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .direction-section {
+            margin-bottom: 1.5rem;
+        }
+        .direction-section:last-child {
+            margin-bottom: 0;
+        }
+        .direction-header {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #a78bfa;
+        }
+        .train-arrival-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 1rem;
-            padding: 0.5rem 0;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+            margin-bottom: 0.75rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .eta-item:last-child {
-            border-bottom: none;
+        .train-arrival-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .train-destination {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+        }
+        .train-details {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: right;
+        }
+        .platform-info, .time-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .platform-info span:first-child, .time-info span:first-child {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+        }
+        .platform-info span:last-child, .time-info span:last-child {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .time-badge {
+            background: #818cf8;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        /* --- End of NEW Styles --- */
+
+        /* Favorite Star Styling */
+        .fav-star {
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .fav-star.favorited {
+            color: #ffd700;
+            transform: scale(1.1);
+        }
+        .fav-star:hover {
+            transform: scale(1.2);
+        }
+        
+        /* Favorites Section Styling */
+        #favorites-container {
+            text-align: center;
+        }
+        #favorites-container h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .favorites-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .favorite-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .favorite-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #a78bfa;
         }
 
         /* Line colors for the text */
@@ -297,6 +398,13 @@
     
     <h1 class="welcome-title" id="page-title">MTR ETA Search</h1>
 
+    <div id="favorites-container" class="acrylic-box">
+        <h3 id="favorites-title">Favorite Stations</h3>
+        <div id="favorites-list" class="favorites-list">
+            <p id="no-favorites-message">No favorite stations yet. Click the star to add one!</p>
+        </div>
+    </div>
+
     <div class="search-container acrylic-box flex flex-col items-center">
         <input type="text" id="station-search" class="search-input" placeholder="Search for a station..." />
         <div id="search-results" class="search-results"></div>
@@ -314,11 +422,14 @@
             const searchResultsContainer = document.getElementById('search-results');
             const dropdownButton = document.getElementById('dropdown-button');
             const dropdownContent = document.getElementById('dropdown-content');
+            const favoritesContainer = document.getElementById('favorites-container');
+            const favoritesList = document.getElementById('favorites-list');
 
             let currentRefreshInterval = null;
             let selectedStation = null;
             let currentLanguage = 'en';
             let stations = [];
+            let favoriteStations = [];
 
             // Translations for key UI text
             const translations = {
@@ -327,59 +438,83 @@
                     title: 'MTR ETA Search',
                     placeholder: 'Search for a station...',
                     initialMessage: 'Please search for a station to view its arrival times.',
-                    noData: 'No data available for this station. The line may not be in operation or there are no trains coming soon.',
+                    stationClosed: 'This station is currently closed or service is unavailable.',
                     upTrains: 'Up Trains',
                     downTrains: 'Down Trains',
                     to: 'To',
                     min: 'min',
-                    plat: 'Plat'
+                    plat: 'Plat',
+                    arrival: 'Arrival',
+                    favoritesTitle: 'Favorite Stations',
+                    noFavorites: 'No favorite stations yet. Click the star to add one!'
                 },
                 zh: {
-                    dropdown: '简体中文',
+                    dropdown: '繁體中文',
                     title: '港鐵到站時間查詢',
                     placeholder: '搜尋車站...',
                     initialMessage: '請搜尋車站以查看其到站時間。',
-                    noData: '此車站暫無到站時間資訊。該線路可能已停止運營或沒有即將到來的列車。',
+                    stationClosed: '此車站目前已關閉或服務暫停。',
                     upTrains: '上行列車',
                     downTrains: '下行列車',
                     to: '往',
                     min: '分鐘',
-                    plat: '月台'
+                    plat: '月台',
+                    arrival: '到達',
+                    favoritesTitle: '最愛車站',
+                    noFavorites: '尚未有最愛車站。點擊星號以新增。'
                 },
                 zh_Hans: {
-                    dropdown: '繁體中文',
+                    dropdown: '简体中文',
                     title: '港铁到站时间查询',
                     placeholder: '搜索车站...',
                     initialMessage: '请搜索车站以查看其到站时间。',
-                    noData: '此车站暂无到站时间信息。该线路可能已停止运营或没有即将到来的列车。',
+                    stationClosed: '此车站目前已关闭或服务暂停。',
                     upTrains: '上行列車',
                     downTrains: '下行列車',
                     to: '往',
                     min: '分钟',
-                    plat: '站台'
+                    plat: '站台',
+                    arrival: '到达',
+                    favoritesTitle: '收藏车站',
+                    noFavorites: '暂无收藏车站。点击星号以添加。'
                 },
                 ja: {
                     dropdown: '日本語',
                     title: 'MTR 到着時間検索',
                     placeholder: '駅を検索...',
                     initialMessage: '駅を検索して到着時間を確認してください。',
-                    noData: 'この駅の情報は利用できません。路線が運行していないか、まもなく到着する電車がない可能性があります。',
+                    stationClosed: 'この駅は現在閉鎖されているか、サービスが利用できません。',
                     upTrains: '上り電車',
                     downTrains: '下り電車',
                     to: '行き',
                     min: '分',
-                    plat: '番線'
+                    plat: '番線',
+                    arrival: '到着',
+                    favoritesTitle: 'お気に入り駅',
+                    noFavorites: 'お気に入りの駅はまだありません。星をクリックして追加してください！'
                 }
             };
             
-            // Station map (unchanged)
+            // Station and Line Maps
+            const lineMap = {
+                'AEL': { name_en: 'Airport Express', name_zh: '機場快綫', name_zh_Hans: '机场快线', name_ja: 'エアポートエクスプレス' },
+                'TCL': { name_en: 'Tung Chung Line', name_zh: '東涌綫', name_zh_Hans: '东涌线', name_ja: '東涌線' },
+                'TML': { name_en: 'Tuen Ma Line', name_zh: '屯馬綫', name_zh_Hans: '屯马线', name_ja: '屯馬線' },
+                'TKL': { name_en: 'Tseung Kwan O Line', name_zh: '將軍澳綫', name_zh_Hans: '将军澳线', name_ja: '将軍澳線' },
+                'EAL': { name_en: 'East Rail Line', name_zh: '東鐵綫', name_zh_Hans: '东铁线', name_ja: '東鉄線' },
+                'SIL': { name_en: 'South Island Line', name_zh: '南港島綫', name_zh_Hans: '南港岛线', name_ja: '南港島線' },
+                'TWL': { name_en: 'Tsuen Wan Line', name_zh: '荃灣綫', name_zh_Hans: '荃湾线', name_ja: '荃灣線' },
+                'ISL': { name_en: 'Island Line', name_zh: '港島綫', name_zh_Hans: '港岛线', name_ja: '港島線' },
+                'KTL': { name_en: 'Kwun Tong Line', name_zh: '觀塘綫', name_zh_Hans: '观塘线', name_ja: '観塘線' },
+                'DRL': { name_en: 'Disneyland Resort Line', name_zh: '迪士尼綫', name_zh_Hans: '迪士尼线', name_ja: 'ディズニーランドリゾート線' }
+            };
+
             const stationMap = {
                 'HOK': { name_en: 'Hong Kong', name_zh: '香港', name_zh_Hans: '香港', name_ja: '香港', lines: ['AEL', 'TCL'] },
                 'KOW': { name_en: 'Kowloon', name_zh: '九龍', name_zh_Hans: '九龙', name_ja: '九龍', lines: ['AEL', 'TCL'] },
-                'TSU': { name_en: 'Tsing Yi', name_zh: '青衣', name_zh_Hans: '青衣', name_ja: '青衣', lines: ['AEL'] },
+                'TSY': { name_en: 'Tsing Yi', name_zh: '青衣', name_zh_Hans: '青衣', name_ja: '青衣', lines: ['AEL', 'TCL'] },
                 'AIR': { name_en: 'Airport', name_zh: '機場', name_zh_Hans: '机场', name_ja: '空港', lines: ['AEL'] },
                 'AWE': { name_en: 'AsiaWorld-Expo', name_zh: '亞洲國際博覽館', name_zh_Hans: '亚洲国际博览馆', name_ja: 'アジアワールド・エキスポ', lines: ['AEL'] },
-                'TSY': { name_en: 'Tsing Yi', name_zh: '青衣', name_zh_Hans: '青衣', name_ja: '青衣', lines: ['TCL'] },
                 'LAK': { name_en: 'Lai King', name_zh: '荔景', name_zh_Hans: '荔景', name_ja: '茘景', lines: ['TCL', 'TWL'] }, 
                 'NAM': { name_en: 'Nam Cheong', name_zh: '南昌', name_zh_Hans: '南昌', name_ja: '南昌', lines: ['TCL', 'TML'] },
                 'OLY': { name_en: 'Olympic', name_zh: '奧運', name_zh_Hans: '奥运', name_ja: 'オリンピック', lines: ['TCL'] },
@@ -393,7 +528,6 @@
                 'KSR': { name_en: 'Kam Sheung Road', name_zh: '錦上路', name_zh_Hans: '锦上路', name_ja: '錦上路', lines: ['TML'] },
                 'TWW': { name_en: 'Tsuen Wan West', name_zh: '荃灣西', name_zh_Hans: '荃湾西', name_ja: '荃灣西', lines: ['TML'] },
                 'MEF': { name_en: 'Mei Foo', name_zh: '美孚', name_zh_Hans: '美孚', name_ja: '美孚', lines: ['TML', 'TWL'] },
-                'NAC': { name_en: 'Nam Cheong', name_zh: '南昌', name_zh_Hans: '南昌', name_ja: '南昌', lines: ['TML', 'TCL'] },
                 'AUS': { name_en: 'Austin', name_zh: '柯士甸', name_zh_Hans: '柯士甸', name_ja: 'オースティン', lines: ['TML'] },
                 'ETS': { name_en: 'East Tsim Sha Tsui', name_zh: '尖東', name_zh_Hans: '尖东', name_ja: '尖東', lines: ['TML'] },
                 'HUH': { name_en: 'Hung Hom', name_zh: '紅磡', name_zh_Hans: '红磡', name_ja: '紅磡', lines: ['TML', 'EAL'] },
@@ -412,6 +546,10 @@
                 'TSH': { name_en: 'Tai Shui Hang', name_zh: '大水坑', name_zh_Hans: '大水坑', name_ja: '大水坑', lines: ['TML'] },
                 'SHM': { name_en: 'Shek Mun', name_zh: '石門', name_zh_Hans: '石门', name_ja: '石門', lines: ['TML'] },
                 'CIO': { name_en: 'City One', name_zh: '第一城', name_zh_Hans: '第一城', name_ja: '第一城', lines: ['TML'] },
+                'ADM': { name_en: 'Admiralty', name_zh: '金鐘', name_zh_Hans: '金钟', name_ja: '金鐘', lines: ['EAL', 'SIL', 'TWL', 'ISL'] },
+                'EXC': { name_en: 'Exhibition Centre', name_zh: '會展', name_zh_Hans: '会展', name_ja: '会展', lines: ['EAL'] },
+                'MKK': { name_en: 'Mong Kok East', name_zh: '旺角東', name_zh_Hans: '旺角东', name_ja: '旺角東', lines: ['EAL'] },
+                'KOT': { name_en: 'Kowloon Tong', name_zh: '九龍塘', name_zh_Hans: '九龙塘', name_ja: '九龍塘', lines: ['EAL', 'KTL'] },
                 'SHT': { name_en: 'Sha Tin', name_zh: '沙田', name_zh_Hans: '沙田', name_ja: '沙田', lines: ['EAL'] },
                 'FOT': { name_en: 'Fo Tan', name_zh: '火炭', name_zh_Hans: '火炭', name_ja: '火炭', lines: ['EAL'] },
                 'RAC': { name_en: 'Racecourse', name_zh: '馬場', name_zh_Hans: '马场', name_ja: '馬場', lines: ['EAL'] },
@@ -422,109 +560,224 @@
                 'SHS': { name_en: 'Sheung Shui', name_zh: '上水', name_zh_Hans: '上水', name_ja: '上水', lines: ['EAL'] },
                 'LOW': { name_en: 'Lo Wu', name_zh: '羅湖', name_zh_Hans: '罗湖', name_ja: '羅湖', lines: ['EAL'] },
                 'LMC': { name_en: 'Lok Ma Chau', name_zh: '落馬洲', name_zh_Hans: '落马洲', name_ja: '落馬洲', lines: ['EAL'] },
-                'ADM': { name_en: 'Admiralty', name_zh: '金鐘', name_zh_Hans: '金钟', name_ja: '金鐘', lines: ['EAL', 'ISL', 'SIL', 'TWL'] },
-                'EXC': { name_en: 'Exhibition Centre', name_zh: '會展', name_zh_Hans: '会展', name_ja: 'エキシビジョンセンター', lines: ['EAL'] },
-                'MKK': { name_en: 'Mong Kok East', name_zh: '旺角東', name_zh_Hans: '旺角东', name_ja: '旺角東', lines: ['EAL'] },
-                'CEN': { name_en: 'Central', name_zh: '中環', name_zh_Hans: '中环', name_ja: '中環', lines: ['ISL', 'TWL'] },
-                'KET': { name_en: 'Kennedy Town', name_zh: '堅尼地城', name_zh_Hans: '坚尼地城', name_ja: '堅尼地城', lines: ['ISL'] },
-                'HKU': { name_en: 'HKU', name_zh: '香港大學', name_zh_Hans: '香港大学', name_ja: '香港大学', lines: ['ISL'] },
-                'SYP': { name_en: 'Sai Ying Pun', name_zh: '西營盤', name_zh_Hans: '西营盘', name_ja: '西營盤', lines: ['ISL'] },
-                'SHW': { name_en: 'Sheung Wan', name_zh: '上環', name_zh_Hans: '上环', name_ja: '上環', lines: ['ISL'] },
-                'WAC': { name_en: 'Wan Chai', name_zh: '灣仔', name_zh_Hans: '湾仔', name_ja: '灣仔', lines: ['ISL'] },
-                'CAB': { name_en: 'Causeway Bay', name_zh: '銅鑼灣', name_zh_Hans: '铜锣湾', name_ja: '銅鑼灣', lines: ['ISL'] },
-                'TIH': { name_en: 'Tin Hau', name_zh: '天后', name_zh_Hans: '天后', name_ja: '天后', lines: ['ISL'] },
-                'FOH': { name_en: 'Fortress Hill', name_zh: '炮台山', name_zh_Hans: '炮台山', name_ja: '炮台山', lines: ['ISL'] },
-                'NOP': { name_en: 'North Point', name_zh: '北角', name_zh_Hans: '北角', name_ja: '北角', lines: ['ISL', 'TKL'] },
-                'QUB': { name_en: 'Quarry Bay', name_zh: '鰂魚涌', name_zh_Hans: '鲗鱼涌', name_ja: '鰂魚涌', lines: ['ISL', 'TKL'] },
-                'TAK': { name_en: 'Tai Koo', name_zh: '太古', name_zh_Hans: '太古', name_ja: '太古', lines: ['ISL'] },
-                'SWH': { name_en: 'Sai Wan Ho', name_zh: '西灣河', name_zh_Hans: '西湾河', name_ja: '西灣河', lines: ['ISL'] },
-                'SKW': { name_en: 'Shau Kei Wan', name_zh: '筲箕灣', name_zh_Hans: '筲箕湾', name_ja: '筲箕湾', lines: ['ISL'] },
-                'HFC': { name_en: 'Heng Fa Chuen', name_zh: '杏花邨', name_zh_Hans: '杏花邨', name_ja: '杏花邨', lines: ['ISL'] },
-                'CHW': { name_en: 'Chai Wan', name_zh: '柴灣', name_zh_Hans: '柴湾', name_ja: '柴灣', lines: ['ISL'] },
                 'OCP': { name_en: 'Ocean Park', name_zh: '海洋公園', name_zh_Hans: '海洋公园', name_ja: '海洋公園', lines: ['SIL'] },
                 'WCH': { name_en: 'Wong Chuk Hang', name_zh: '黃竹坑', name_zh_Hans: '黄竹坑', name_ja: '黄竹坑', lines: ['SIL'] },
                 'LET': { name_en: 'Lei Tung', name_zh: '利東', name_zh_Hans: '利东', name_ja: '利東', lines: ['SIL'] },
                 'SOH': { name_en: 'South Horizons', name_zh: '海怡半島', name_zh_Hans: '海怡半岛', name_ja: '海怡半島', lines: ['SIL'] },
-                'TSW': { name_en: 'Tsuen Wan', name_zh: '荃灣', name_zh_Hans: '荃湾', name_ja: '荃灣', lines: ['TWL'] },
-                'TWH': { name_en: 'Tai Wo Hau', name_zh: '大窩口', name_zh_Hans: '大窝口', name_ja: '大窩口', lines: ['TWL'] },
-                'KWH': { name_en: 'Kwai Hing', name_zh: '葵興', name_zh_Hans: '葵兴', name_ja: '葵興', lines: ['TWL'] },
-                'KWF': { name_en: 'Kwai Fong', name_zh: '葵芳', name_zh_Hans: '葵芳', name_ja: '葵芳', lines: ['TWL'] },
-                'LCK': { name_en: 'Lai Chi Kok', name_zh: '荔枝角', name_zh_Hans: '荔枝角', name_ja: '茘枝角', lines: ['TWL'] },
-                'CSW': { name_en: 'Cheung Sha Wan', name_zh: '長沙灣', name_zh_Hans: '长沙湾', name_ja: '長沙湾', lines: ['TWL'] },
-                'SSP': { name_en: 'Sham Shui Po', name_zh: '深水埗', name_zh_Hans: '深水埗', name_ja: '深水埗', lines: ['TWL'] },
-                'PRE': { name_en: 'Prince Edward', name_zh: '太子', name_zh_Hans: '太子', name_ja: '太子', lines: ['TWL', 'KTL'] },
-                'MOK': { name_en: 'Mong Kok', name_zh: '旺角', name_zh_Hans: '旺角', name_ja: '旺角', lines: ['TWL', 'KTL'] },
-                'YMT': { name_en: 'Yau Ma Tei', name_zh: '油麻地', name_zh_Hans: '油麻地', name_ja: '油麻地', lines: ['TWL', 'KTL'] },
-                'JOR': { name_en: 'Jordan', name_zh: '佐敦', name_zh_Hans: '佐敦', name_ja: '佐敦', lines: ['TWL'] },
+                'CEN': { name_en: 'Central', name_zh: '中環', name_zh_Hans: '中环', name_ja: '中環', lines: ['TWL', 'ISL'] },
                 'TST': { name_en: 'Tsim Sha Tsui', name_zh: '尖沙咀', name_zh_Hans: '尖沙咀', name_ja: '尖沙咀', lines: ['TWL'] },
+                'JOR': { name_en: 'Jordan', name_zh: '佐敦', name_zh_Hans: '佐敦', name_ja: '佐敦', lines: ['TWL'] },
+                'YMT': { name_en: 'Yau Ma Tei', name_zh: '油麻地', name_zh_Hans: '油麻地', name_ja: '油麻地', lines: ['TWL', 'KTL'] },
+                'MOK': { name_en: 'Mong Kok', name_zh: '旺角', name_zh_Hans: '旺角', name_ja: '旺角', lines: ['TWL', 'KTL'] },
+                'PRE': { name_en: 'Prince Edward', name_zh: '太子', name_zh_Hans: '太子', name_ja: '太子', lines: ['TWL', 'KTL'] },
+                'SSP': { name_en: 'Sham Shui Po', name_zh: '深水埗', name_zh_Hans: '深水埗', name_ja: '深水埗', lines: ['TWL'] },
+                'CSW': { name_en: 'Cheung Sha Wan', name_zh: '長沙灣', name_zh_Hans: '长沙湾', name_ja: '長沙湾', lines: ['TWL'] },
+                'LCK': { name_en: 'Lai Chi Kok', name_zh: '茘枝角', name_zh_Hans: '茘枝角', name_ja: '茘枝角', lines: ['TWL'] },
+                'KWF': { name_en: 'Kwai Fong', name_zh: '葵芳', name_zh_Hans: '葵芳', name_ja: '葵芳', lines: ['TWL'] },
+                'KWH': { name_en: 'Kwai Hing', name_zh: '葵興', name_zh_Hans: '葵兴', name_ja: '葵興', lines: ['TWL'] },
+                'TWH': { name_en: 'Tai Wo Hau', name_zh: '大窩口', name_zh_Hans: '大窝口', name_ja: '大窩口', lines: ['TWL'] },
+                'TSW': { name_en: 'Tsuen Wan', name_zh: '荃灣', name_zh_Hans: '荃湾', name_ja: '荃灣', lines: ['TWL'] },
                 'WHA': { name_en: 'Whampoa', name_zh: '黃埔', name_zh_Hans: '黄埔', name_ja: '黄埔', lines: ['KTL'] },
-                'HOM': { name_en: 'Ho Man Tin', name_zh: '何文田', name_zh_Hans: '何文田', name_ja: '何文田', lines: ['KTL', 'TML'] },
-                'SKM': { name_en: 'Shek Kip Mei', name_zh: '石硤尾', name_zh_Hans: '石硖尾', name_ja: '石硤尾', lines: ['KTL'] },
-                'KOT': { name_en: 'Kowloon Tong', name_zh: '九龍塘', name_zh_Hans: '九龙塘', name_ja: '九龍塘', lines: ['KTL', 'EAL'] },
-                'LOF': { name_en: 'Lok Fu', name_zh: '樂富', name_zh_Hans: '乐富', name_ja: '楽富', lines: ['KTL'] },
+                'LOK': { name_en: 'Lok Fu', name_zh: '樂富', name_zh_Hans: '乐富', name_ja: '楽富', lines: ['KTL'] },
                 'WTS': { name_en: 'Wong Tai Sin', name_zh: '黃大仙', name_zh_Hans: '黄大仙', name_ja: '黄大仙', lines: ['KTL'] },
                 'CHH': { name_en: 'Choi Hung', name_zh: '彩虹', name_zh_Hans: '彩虹', name_ja: '彩虹', lines: ['KTL'] },
-                'KOB': { name_en: 'Kowloon Bay', name_zh: '九龍灣', name_zh_Hans: '九龙湾', name_ja: '九龍灣', lines: ['KTL'] },
+                'KOB': { name_en: 'Kowloon Bay', name_zh: '九龍灣', name_zh_Hans: '九龙湾', name_ja: '九龍湾', lines: ['KTL'] },
                 'NTK': { name_en: 'Ngau Tau Kok', name_zh: '牛頭角', name_zh_Hans: '牛头角', name_ja: '牛頭角', lines: ['KTL'] },
                 'KWT': { name_en: 'Kwun Tong', name_zh: '觀塘', name_zh_Hans: '观塘', name_ja: '観塘', lines: ['KTL'] },
                 'LAT': { name_en: 'Lam Tin', name_zh: '藍田', name_zh_Hans: '蓝田', name_ja: '藍田', lines: ['KTL'] },
                 'YAT': { name_en: 'Yau Tong', name_zh: '油塘', name_zh_Hans: '油塘', name_ja: '油塘', lines: ['KTL', 'TKL'] },
                 'TIK': { name_en: 'Tiu Keng Leng', name_zh: '調景嶺', name_zh_Hans: '调景岭', name_ja: '調景嶺', lines: ['KTL', 'TKL'] },
-                'LHP': { name_en: 'LOHAS Park', name_zh: '康城', name_zh_Hans: '康城', name_ja: '康城', lines: ['TKL'] },
+                'NOP': { name_en: 'North Point', name_zh: '北角', name_zh_Hans: '北角', name_ja: '北角', lines: ['TKL', 'ISL'] },
+                'QUB': { name_en: 'Quarry Bay', name_zh: '鰂魚涌', name_zh_Hans: '鰂鱼涌', name_ja: '鰂魚涌', lines: ['TKL', 'ISL'] },
+                'YUT': { name_en: 'Yau Tong', name_zh: '油塘', name_zh_Hans: '油塘', name_ja: '油塘', lines: ['TKL'] },
                 'POA': { name_en: 'Po Lam', name_zh: '寶琳', name_zh_Hans: '宝琳', name_ja: '宝琳', lines: ['TKL'] },
-                'TKO': { name_en: 'Tseung Kwan O', name_zh: '將軍澳', name_zh_Hans: '将军澳', name_ja: '將軍澳', lines: ['TKL'] },
                 'HAH': { name_en: 'Hang Hau', name_zh: '坑口', name_zh_Hans: '坑口', name_ja: '坑口', lines: ['TKL'] },
-                'DIS': { name_en: 'Disneyland Resort', name_zh: '迪士尼', name_zh_Hans: '迪士尼', name_ja: 'ディズニーランド・リゾート', lines: ['DRL'] }
+                'TKO': { name_en: 'Tseung Kwan O', name_zh: '將軍澳', name_zh_Hans: '将军澳', name_ja: '将軍澳', lines: ['TKL'] },
+                'LHP': { name_en: 'LOHAS Park', name_zh: '康城', name_zh_Hans: '康城', name_ja: '康城', lines: ['TKL'] },
+                'HKU': { name_en: 'HKU', name_zh: '香港大學', name_zh_Hans: '香港大学', name_ja: '香港大学', lines: ['ISL'] },
+                'SYP': { name_en: 'Sai Ying Pun', name_zh: '西營盤', name_zh_Hans: '西营盘', name_ja: '西営盤', lines: ['ISL'] },
+                'SHW': { name_en: 'Sheung Wan', name_zh: '上環', name_zh_Hans: '上环', name_ja: '上環', lines: ['ISL'] },
+                'WAC': { name_en: 'Wan Chai', name_zh: '灣仔', name_zh_Hans: '湾仔', name_ja: '湾仔', lines: ['ISL'] },
+                'CAB': { name_en: 'Causeway Bay', name_zh: '銅鑼灣', name_zh_Hans: '铜锣湾', name_ja: '銅鑼湾', lines: ['ISL'] },
+                'TIH': { name_en: 'Tin Hau', name_zh: '天后', name_zh_Hans: '天后', name_ja: '天后', lines: ['ISL'] },
+                'FOH': { name_en: 'Fortress Hill', name_zh: '炮台山', name_zh_Hans: '炮台山', name_ja: '炮台山', lines: ['ISL'] },
+                'TAK': { name_en: 'Tai Koo', name_zh: '太古', name_zh_Hans: '太古', name_ja: '太古', lines: ['ISL'] },
+                'SWH': { name_en: 'Sai Wan Ho', name_zh: '西灣河', name_zh_Hans: '西湾河', name_ja: '西湾河', lines: ['ISL'] },
+                'SKW': { name_en: 'Shau Kei Wan', name_zh: '筲箕灣', name_zh_Hans: '筲箕湾', name_ja: '筲箕湾', lines: ['ISL'] },
+                'HFC': { name_en: 'Heng Fa Chuen', name_zh: '杏花邨', name_zh_Hans: '杏花邨', name_ja: '杏花邨', lines: ['ISL'] },
+                'CHW': { name_en: 'Chai Wan', name_zh: '柴灣', name_zh_Hans: '柴湾', name_ja: '柴湾', lines: ['ISL'] },
+                'DIS': { name_en: 'Disneyland Resort', name_zh: '迪士尼', name_zh_Hans: '迪士尼', name_ja: 'ディズニー', lines: ['DRL'] }
             };
 
-            const updateSearchStations = () => {
-                stations = [];
-                for (const code in stationMap) {
-                    const station = stationMap[code];
-                    const name_en = station.name_en;
-                    const name_zh = station.name_zh;
-                    const name_zh_Hans = station.name_zh_Hans;
-                    const name_ja = station.name_ja;
-                    station.lines.forEach(line => {
-                        stations.push({
-                            code: code,
-                            name_en: name_en,
-                            name_zh: name_zh,
-                            name_zh_Hans: name_zh_Hans,
-                            name_ja: name_ja,
-                            line: line
-                        });
+            // Function to load favorites from localStorage
+            const loadFavorites = () => {
+                const favs = localStorage.getItem('mtrFavoriteStations');
+                if (favs) {
+                    favoriteStations = JSON.parse(favs);
+                }
+                renderFavorites();
+            };
+
+            // Function to save favorites to localStorage
+            const saveFavorites = () => {
+                localStorage.setItem('mtrFavoriteStations', JSON.stringify(favoriteStations));
+            };
+            
+            // Function to render the favorite stations
+            const renderFavorites = () => {
+                favoritesList.innerHTML = '';
+                const t = translations[currentLanguage];
+                if (favoriteStations.length === 0) {
+                    favoritesList.innerHTML = `<p id="no-favorites-message" class="opacity-70">${t.noFavorites}</p>`;
+                } else {
+                    favoriteStations.forEach(favId => {
+                        const [stationCode, lineCode] = favId.split('-');
+                        const station = stationMap[stationCode];
+                        const line = lineMap[lineCode];
+                        if (station && line) {
+                            const btn = document.createElement('button');
+                            btn.className = 'favorite-btn';
+                            btn.textContent = `${getStationName(stationCode)} (${getLineName(lineCode)})`;
+                            btn.onclick = () => selectStation(lineCode, stationCode);
+                            favoritesList.appendChild(btn);
+                        }
                     });
                 }
             };
 
+            // Function to toggle a station as favorite
+            const toggleFavorite = (stationCode, lineCode) => {
+                const favId = `${stationCode}-${lineCode}`;
+                const index = favoriteStations.indexOf(favId);
+                const isCurrentlyFavorited = index > -1;
+
+                if (isCurrentlyFavorited) {
+                    favoriteStations.splice(index, 1); // Remove from favorites
+                } else {
+                    favoriteStations.push(favId); // Add to favorites
+                }
+                
+                saveFavorites();
+                renderFavorites();
+                
+                const newFavoritedState = !isCurrentlyFavorited;
+
+                // Update star in the currently displayed card if it matches
+                const currentStar = document.querySelector(`.station-info-header .fav-star[data-station-code="${stationCode}"][data-line-code="${lineCode}"]`);
+                if (currentStar) {
+                    currentStar.classList.toggle('favorited', newFavoritedState);
+                }
+
+                // Also update stars in search results (if they are visible)
+                const searchResultStars = document.querySelectorAll(`.search-results-item .fav-star[data-station-code="${stationCode}"][data-line-code="${lineCode}"]`);
+                searchResultStars.forEach(star => star.classList.toggle('favorited', newFavoritedState));
+            };
+
+            // Function to set the language
             const setLanguage = (lang) => {
                 currentLanguage = lang;
+                const t = translations[lang];
+                document.getElementById('page-title').textContent = t.title;
+                searchInput.placeholder = t.placeholder;
+                const initialMessageEl = document.getElementById('initial-message');
+                if (initialMessageEl) {
+                    initialMessageEl.textContent = t.initialMessage;
+                }
+                document.getElementById('favorites-title').textContent = t.favoritesTitle;
+                dropdownButton.textContent = t.dropdown;
                 localStorage.setItem('languagePreference', lang);
-                updateSearchStations();
-                document.getElementById('page-title').textContent = translations[lang].title;
-                searchInput.placeholder = translations[lang].placeholder;
-                dropdownButton.textContent = translations[lang].dropdown;
+                renderFavorites(); // Re-render favorites with new language
                 if (selectedStation) {
-                    const stationInfo = stationMap[selectedStation.code];
-                    selectedStation.name_en = stationInfo.name_en;
-                    selectedStation.name_zh = stationInfo.name_zh;
-                    selectedStation.name_zh_Hans = stationInfo.name_zh_Hans;
-                    selectedStation.name_ja = stationInfo.name_ja;
-                    fetchAndRenderSingleStationData(selectedStation.code, selectedStation.line);
-                } else {
-                    document.getElementById('initial-message').textContent = translations[lang].initialMessage;
+                    fetchAndDisplayMtrData(selectedStation.line, selectedStation.sta);
                 }
             };
 
-            const fetchAndRenderSingleStationData = async (stationCode, lineCode) => {
-                if (!stationCode || !lineCode) {
-                    mtrDataContainer.innerHTML = `<p class="opacity-70" id="initial-message">${translations[currentLanguage].initialMessage}</p>`;
+            // Function to get station or line name based on language
+            const getStationName = (stationCode) => {
+                const station = stationMap[stationCode];
+                if (!station) return stationCode;
+                return station[`name_${currentLanguage}`] || station.name_en;
+            };
+
+            const getLineName = (lineCode) => {
+                const line = lineMap[lineCode];
+                if (!line) return lineCode;
+                return line[`name_${currentLanguage}`] || line.name_en;
+            };
+
+            // Populate stations array from stationMap
+            stations = Object.keys(stationMap).map(code => ({
+                code: code,
+                ...stationMap[code]
+            }));
+
+            // Function to handle search input
+            const handleSearchInput = () => {
+                const query = searchInput.value.toLowerCase();
+                if (query.length === 0) {
+                    searchResultsContainer.style.display = 'none';
                     return;
                 }
 
-                mtrDataContainer.innerHTML = `<div class="loader"></div>`;
+                const filteredStations = stations.filter(station =>
+                    station.name_en.toLowerCase().includes(query) ||
+                    station.name_zh.toLowerCase().includes(query) ||
+                    station.name_zh_Hans.toLowerCase().includes(query) ||
+                    station.name_ja.toLowerCase().includes(query) ||
+                    station.code.toLowerCase().includes(query)
+                );
 
+                searchResultsContainer.innerHTML = '';
+                if (filteredStations.length > 0) {
+                    filteredStations.forEach(station => {
+                        station.lines.forEach(lineCode => {
+                            const favId = `${station.code}-${lineCode}`;
+                            const isFavorited = favoriteStations.includes(favId);
+                            const item = document.createElement('div');
+                            item.className = 'search-results-item';
+                            item.onclick = () => {
+                                selectStation(lineCode, station.code);
+                            };
+                            
+                            const stationName = document.createElement('span');
+                            stationName.textContent = `${getStationName(station.code)} (${getLineName(lineCode)})`;
+
+                            const star = document.createElement('i');
+                            star.className = `fas fa-star fav-star ${isFavorited ? 'favorited' : ''}`;
+                            star.dataset.stationCode = station.code;
+                            star.dataset.lineCode = lineCode;
+                            star.onclick = (e) => {
+                                e.stopPropagation(); 
+                                toggleFavorite(station.code, lineCode);
+                            };
+                            
+                            item.appendChild(stationName);
+                            item.appendChild(star);
+                            searchResultsContainer.appendChild(item);
+                        });
+                    });
+                    searchResultsContainer.style.display = 'block';
+                } else {
+                    searchResultsContainer.style.display = 'none';
+                }
+            };
+            
+            // Function to handle station selection
+            const selectStation = (line, stationCode) => {
+                selectedStation = { line: line, sta: stationCode };
+                searchInput.value = `${getStationName(stationCode)} (${getLineName(line)})`;
+                searchResultsContainer.style.display = 'none';
+                
+                if (currentRefreshInterval) {
+                    clearInterval(currentRefreshInterval);
+                }
+                fetchAndDisplayMtrData(line, stationCode);
+                currentRefreshInterval = setInterval(() => fetchAndDisplayMtrData(line, stationCode), 20000);
+            };
+
+            // Function to fetch and display MTR data with improved UI
+            const fetchAndDisplayMtrData = async (lineCode, stationCode) => {
+                mtrDataContainer.innerHTML = '<div class="loader"></div>';
                 try {
                     const url = `${mtrApiUrl}?line=${lineCode}&sta=${stationCode}`;
                     const response = await fetch(url);
@@ -533,178 +786,103 @@
                     }
                     const etaData = await response.json();
                     const stationDataKey = `${lineCode}-${stationCode}`;
-                    const lineStationData = etaData.data[stationDataKey];
-                    const stationName = stationMap[stationCode][`name_${currentLanguage}`] || stationMap[stationCode].name_en;
+                    const lineStationData = etaData.data ? etaData.data[stationDataKey] : null;
+                    const stationName = getStationName(stationCode);
+                    const lineName = getLineName(lineCode);
+                    const favId = `${stationCode}-${lineCode}`;
+                    const isFavorited = favoriteStations.includes(favId);
 
                     let stationHtml = `
-                        <div class="station-card">
-                            <h4 class="line-${lineCode}">${stationName} (${lineCode})</h4>
-                            <div class="eta-list">
+                        <div class="station-info-card">
+                            <div class="station-info-header">
+                                <h4>${stationName} - ${lineName}</h4>
+                                <i class="fas fa-star fa-lg fav-star ${isFavorited ? 'favorited' : ''}" data-station-code="${stationCode}" data-line-code="${lineCode}"></i>
+                            </div>
                     `;
                     let hasData = false;
 
-                    if (lineStationData && lineStationData.UP && lineStationData.UP.length > 0) {
-                        hasData = true;
-                        stationHtml += `<h5 class="font-bold mt-2 mb-1">${translations[currentLanguage].upTrains}</h5>`;
-                        lineStationData.UP.forEach(train => {
-                            let destinationStation = stationMap[train.dest];
-                            if (destinationStation) {
-                                let destinationName = destinationStation[`name_${currentLanguage}`] || destinationStation.name_en;
-                                let arrivalText = train.ttnt ? `${train.ttnt} ${translations[currentLanguage].min}` : (train.tnt || 'N/A');
-                                stationHtml += `
-                                    <div class="eta-item">
-                                        <span>${translations[currentLanguage].to} ${destinationName}</span>
-                                        <span>${arrivalText} (${translations[currentLanguage].plat} ${train.plat})</span>
-                                    </div>
-                                `;
-                            }
-                        });
-                    }
+                    const renderTrains = (trains, direction, iconClass) => {
+                        if (trains && trains.length > 0) {
+                            hasData = true;
+                            let sectionHtml = `<div class="direction-section">
+                                <h5 class="direction-header"><i class="fas ${iconClass}"></i> ${direction}</h5>`;
+                            trains.forEach(train => {
+                                let destinationStation = stationMap[train.dest];
+                                if (destinationStation) {
+                                    let destinationName = getStationName(train.dest);
+                                    let arrivalMins = calculateMinutes(train.time);
+                                    sectionHtml += `
+                                        <div class="train-arrival-item">
+                                            <div class="train-destination">
+                                                <i class="fas fa-train"></i>
+                                                <span>${translations[currentLanguage].to} <strong class="line-${train.dest}">${destinationName}</strong></span>
+                                            </div>
+                                            <div class="train-details">
+                                                <div class="platform-info">
+                                                    <span>${translations[currentLanguage].plat}</span>
+                                                    <span>${train.plat}</span>
+                                                </div>
+                                                <div class="time-info">
+                                                    <span>${translations[currentLanguage].arrival}</span>
+                                                    <span class="time-badge">${arrivalMins} ${translations[currentLanguage].min}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            });
+                            sectionHtml += `</div>`;
+                            return sectionHtml;
+                        }
+                        return '';
+                    };
 
-                    if (lineStationData && lineStationData.DOWN && lineStationData.DOWN.length > 0) {
-                        hasData = true;
-                        stationHtml += `<h5 class="font-bold mt-2 mb-1">${translations[currentLanguage].downTrains}</h5>`;
-                        lineStationData.DOWN.forEach(train => {
-                            let destinationStation = stationMap[train.dest];
-                            if (destinationStation) {
-                                let destinationName = destinationStation[`name_${currentLanguage}`] || destinationStation.name_en;
-                                let arrivalText = train.ttnt ? `${train.ttnt} ${translations[currentLanguage].min}` : (train.tnt || 'N/A');
-                                stationHtml += `
-                                    <div class="eta-item">
-                                        <span>${translations[currentLanguage].to} ${destinationName}</span>
-                                        <span>${arrivalText} (${translations[currentLanguage].plat} ${train.plat})</span>
-                                    </div>
-                                `;
-                            }
-                        });
-                    }
+                    stationHtml += renderTrains(lineStationData?.UP, translations[currentLanguage].upTrains, 'fa-arrow-up');
+                    stationHtml += renderTrains(lineStationData?.DOWN, translations[currentLanguage].downTrains, 'fa-arrow-down');
 
                     if (!hasData) {
-                        stationHtml += `<p class="opacity-70">${translations[currentLanguage].noData}</p>`;
+                        stationHtml += `<p class="opacity-70 text-center py-4">${translations[currentLanguage].stationClosed}</p>`;
                     }
 
-                    stationHtml += `
-                            </div>
-                        </div>
-                    `;
-
+                    stationHtml += `</div>`;
                     mtrDataContainer.innerHTML = stationHtml;
+                    
+                    // Re-attach event listener for the new star icon
+                    const starInCard = mtrDataContainer.querySelector('.fav-star');
+                    if (starInCard) {
+                        starInCard.addEventListener('click', () => {
+                            toggleFavorite(stationCode, lineCode);
+                        });
+                    }
+
                 } catch (error) {
                     console.error('Error fetching MTR data:', error);
                     mtrDataContainer.innerHTML = `<p class="text-red-400 text-center">Failed to load ETA data. Please try again later.</p>`;
                 }
             };
 
-            const handleSearchInput = (e) => {
-                const query = e.target.value.trim().toLowerCase();
-                searchResultsContainer.innerHTML = '';
-
-                if (query.length < 2) {
-                    searchResultsContainer.style.display = 'none';
-                    return;
-                }
-
-                const uniqueStations = new Set();
-                const filteredStations = stations.filter(station => {
-                    const name_en = station.name_en.toLowerCase();
-                    const name_zh = station.name_zh.toLowerCase();
-                    const name_zh_Hans = station.name_zh_Hans.toLowerCase();
-                    const name_ja = station.name_ja.toLowerCase();
-                    const uniqueKey = `${station.name_en}-${station.line}`;
-                    if (
-                        name_en.includes(query) ||
-                        name_zh.includes(query) ||
-                        name_zh_Hans.includes(query) ||
-                        name_ja.includes(query)
-                    ) {
-                        if (!uniqueStations.has(uniqueKey)) {
-                            uniqueStations.add(uniqueKey);
-                            return true;
-                        }
-                    }
-                    return false;
-                });
-
-                if (filteredStations.length > 0) {
-                    filteredStations.forEach(station => {
-                        const resultItem = document.createElement('div');
-                        resultItem.className = 'search-results-item';
-                        const displayName = station[`name_${currentLanguage}`] || station.name_en;
-                        resultItem.innerHTML = `${displayName} <span class="text-xs opacity-70">(${station.line})</span>`;
-                        resultItem.addEventListener('click', () => {
-                            selectedStation = station;
-                            fetchAndRenderSingleStationData(station.code, station.line);
-                            searchResultsContainer.style.display = 'none';
-                            searchInput.value = displayName;
-                            if (currentRefreshInterval) {
-                                clearInterval(currentRefreshInterval);
-                            }
-                            currentRefreshInterval = setInterval(() => {
-                                if (selectedStation) {
-                                    fetchAndRenderSingleStationData(selectedStation.code, selectedStation.line);
-                                }
-                            }, 10000);
-                        });
-                        searchResultsContainer.appendChild(resultItem);
-                    });
-                    searchResultsContainer.style.display = 'block';
-                } else {
-                    searchResultsContainer.style.display = 'none';
-                }
+            // Function to calculate minutes from now
+            const calculateMinutes = (timeStr) => {
+                const trainTime = new Date(timeStr).getTime();
+                const now = new Date().getTime();
+                const diff = Math.round((trainTime - now) / 60000);
+                return diff > 0 ? diff : 0;
             };
 
-            const handleSearchSubmit = () => {
-                const query = searchInput.value.trim().toLowerCase();
-                if (!query) {
-                    mtrDataContainer.innerHTML = `<p class="opacity-70" id="initial-message">${translations[currentLanguage].initialMessage}</p>`;
-                    return;
-                }
-
-                const matchedStation = stations.find(station => {
-                    return (
-                        station.name_en.toLowerCase() === query ||
-                        station.name_zh.toLowerCase() === query ||
-                        station.name_zh_Hans.toLowerCase() === query ||
-                        station.name_ja.toLowerCase() === query
-                    );
-                });
-
-                if (matchedStation) {
-                    selectedStation = matchedStation;
-                    const displayName = matchedStation[`name_${currentLanguage}`] || matchedStation.name_en;
-                    searchInput.value = displayName;
-                    fetchAndRenderSingleStationData(matchedStation.code, matchedStation.line);
-                    searchResultsContainer.style.display = 'none';
-                    if (currentRefreshInterval) {
-                        clearInterval(currentRefreshInterval);
-                    }
-                    currentRefreshInterval = setInterval(() => {
-                        if (selectedStation) {
-                            fetchAndRenderSingleStationData(selectedStation.code, selectedStation.line);
-                        }
-                    }, 10000);
-                } else {
-                    mtrDataContainer.innerHTML = `<p class="text-red-400 text-center">${translations[currentLanguage].noStation}</p>`;
-                    searchResultsContainer.style.display = 'none';
-                }
-            };
-
-            // Custom dropdown event listeners
+            // Event Listeners
             dropdownButton.addEventListener('click', () => {
                 dropdownContent.classList.toggle('active');
             });
 
-            dropdownContent.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const lang = e.target.getAttribute('data-lang');
-                    setLanguage(lang);
+            dropdownContent.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A') {
+                    setLanguage(e.target.dataset.lang);
                     dropdownContent.classList.remove('active');
-                });
+                }
             });
 
             document.addEventListener('click', (e) => {
-                if (!dropdownContent.contains(e.target) && e.target !== dropdownButton) {
+                if (!dropdownButton.contains(e.target) && !dropdownContent.contains(e.target)) {
                     dropdownContent.classList.remove('active');
                 }
                 if (!searchResultsContainer.contains(e.target) && e.target !== searchInput) {
@@ -713,37 +891,29 @@
             });
 
             searchInput.addEventListener('input', handleSearchInput);
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    handleSearchSubmit();
-                }
-            });
-
-            const titles = document.querySelectorAll('.welcome-title');
+            
+            // Fade in title on scroll
+            const title = document.querySelector('.welcome-title');
             const observerOptions = {
                 root: null,
                 rootMargin: '0px',
-                threshold: 0.5
+                threshold: 0.1
             };
-            const observer = new IntersectionObserver((entries, observer) => {
+            const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
-                        observer.unobserve(entry.target);
                     }
                 });
             }, observerOptions);
+            observer.observe(title);
 
-            titles.forEach(title => {
-                observer.observe(title);
-            });
-
+            // Set language from local storage or default and load favorites
             const savedLanguage = localStorage.getItem('languagePreference');
             if (savedLanguage) {
                 setLanguage(savedLanguage);
-            } else {
-                setLanguage('en');
             }
+            loadFavorites();
         });
     </script>
 </body>

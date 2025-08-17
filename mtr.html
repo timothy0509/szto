@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MTR ETA Search</title>
-    <!-- Tailwind CSS for utility classes -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Font - Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
@@ -27,7 +24,6 @@
             padding-bottom: 2rem;
             color: #ffffff;
         }
-
         /* Main Title Styling */
         .welcome-title {
             font-size: 4rem;
@@ -49,7 +45,6 @@
             opacity: 1;
             transform: translateY(0);
         }
-
         /* Responsive Title Adjustments */
         @media (min-width: 768px) {
             .welcome-title { font-size: 5rem; }
@@ -57,7 +52,6 @@
         @media (min-width: 1024px) {
             .welcome-title { font-size: 6rem; }
         }
-
         /* Acrylic Box Styling for Search and Results */
         .acrylic-box {
             background: rgba(255, 255, 255, 0.1);
@@ -69,8 +63,17 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             max-width: 800px;
             width: 90%;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out forwards;
         }
-
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Staggered fadeIn for different sections */
+        #favorites-container { animation-delay: 0.2s; }
+        .search-container { animation-delay: 0.4s; }
+        #mtr-data-container { animation-delay: 0.6s; }
         /* Search Bar Styling */
         .search-container {
             position: relative;
@@ -96,7 +99,6 @@
         .search-input::placeholder {
             color: rgba(255, 255, 255, 0.6);
         }
-
         /* Search Results Styling */
         .search-results {
             position: relative;
@@ -112,11 +114,25 @@
             margin-top: 0.5rem;
             margin-bottom: 1rem;
             display: none;
+            animation: slideInFromTop 0.3s ease-out forwards;
+            transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s cubic-bezier(0.4,0,0.2,1);
+            max-height: 0;
+            opacity: 0;
+            overflow-x: hidden;
+        }
+        @keyframes slideInFromTop {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .search-results.show {
+            max-height: 400px;
+            opacity: 1;
+            box-shadow: 0 12px 32px rgba(129,140,248,0.25);
         }
         .search-results-item {
             padding: 0.75rem 1rem;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: background-color 0.2s ease, transform 0.2s ease;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: space-between;
@@ -127,110 +143,119 @@
         }
         .search-results-item:hover {
             background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02); /* Added subtle scale effect */
         }
-
-        /* --- NEW Station Info UI Styles --- */
-        .station-info-card {
+        /* Station ETA Display Styling */
+        .station-card {
             background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
+            border-radius: 8px;
+            padding: 1rem;
             margin-top: 1.5rem;
+            animation: fadeIn 0.8s ease-out forwards;
         }
-        .station-info-header {
+        .station-card-header {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 1rem;
-        }
-        .station-info-header h4 {
-            font-size: 1.75rem;
-            font-weight: bold;
-            margin: 0;
-        }
-        .direction-section {
-            margin-bottom: 1.5rem;
-        }
-        .direction-section:last-child {
-            margin-bottom: 0;
-        }
-        .direction-header {
-            font-size: 1.25rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
             gap: 0.5rem;
-            color: #a78bfa;
         }
-        .train-arrival-item {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            padding: 1rem;
+        .station-card h4 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .eta-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .eta-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.75rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-size: 1rem;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: relative;
         }
-        .train-arrival-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        .eta-item:last-child {
+            border-bottom: none;
         }
-        .train-destination {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.1rem;
+        .eta-item:hover {
+            background-color: rgba(129, 140, 248, 0.12); /* Subtle hover background */
+            transform: translateX(5px); /* Added a slight shift effect */
+            box-shadow: 0 4px 16px rgba(129,140,248,0.15);
         }
-        .train-details {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            text-align: right;
-        }
-        .platform-info, .time-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .platform-info span:first-child, .time-info span:first-child {
-            font-size: 0.8rem;
-            opacity: 0.7;
-            margin-bottom: 0.25rem;
-            text-transform: uppercase;
-        }
-        .platform-info span:last-child, .time-info span:last-child {
-            font-size: 1.25rem;
-            font-weight: bold;
-        }
-        .time-badge {
-            background: #818cf8;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
-        /* --- End of NEW Styles --- */
 
+        /* ETA indicator colors */
+        .eta-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3em;
+            font-weight: 600;
+            padding: 0.18em 0.55em;
+            border-radius: 16px;
+            font-size: 0.95em;
+        }
+        @media (max-width: 640px) {
+            .eta-indicator {
+                font-size: 0.8em;
+                padding: 0.12em 0.35em;
+                border-radius: 12px;
+            }
+            .eta-icon {
+                font-size: 0.9em;
+                margin-right: 0.15em;
+            }
+        }
+        
+        .eta-green {
+            background: linear-gradient(90deg, #34d399 60%, #10b981 100%);
+            color: #fff;
+        }
+        .eta-yellow {
+            background: linear-gradient(90deg, #fbbf24 60%, #f59e42 100%);
+            color: #fff;
+        }
+        .eta-red {
+            background: linear-gradient(90deg, #ef4444 60%, #dc2626 100%);
+            color: #fff;
+        }
+        .eta-icon {
+            margin-right: 0.3em;
+            font-size: 1.1em;
+        }
+        .eta-progress {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 3px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, #818cf8 0%, #3b82f6 100%);
+            transition: width 0.5s;
+        }
+        
         /* Favorite Star Styling */
         .fav-star {
             cursor: pointer;
             color: #ccc;
-            transition: color 0.2s ease, transform 0.2s ease;
+            transition: color 0.2s ease, transform 0.2s ease, text-shadow 0.2s ease;
         }
         .fav-star.favorited {
             color: #ffd700;
             transform: scale(1.1);
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5); /* Added glow effect */
         }
         .fav-star:hover {
             transform: scale(1.2);
         }
-        
         /* Favorites Section Styling */
         #favorites-container {
             text-align: center;
@@ -258,8 +283,9 @@
         .favorite-btn:hover {
             background: rgba(255, 255, 255, 0.25);
             border-color: #a78bfa;
+            transform: translateY(-2px); /* Lift effect on hover */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
-
         /* Line colors for the text */
         .line-AEL { color: #87929a; }
         .line-TCL { color: #f47920; }
@@ -271,7 +297,6 @@
         .line-ISL { color: #0076a9; }
         .line-KTL { color: #88c049; }
         .line-DRL { color: #d687b8; }
-
         /* Loader */
         .loader {
             border: 4px solid #f3f3f3;
@@ -286,11 +311,16 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         @media (max-width: 640px) {
             .welcome-title { font-size: 3rem; padding-top: 6rem; }
+            .search-results {
+                max-height: 300px;
+                margin-top: 1rem;
+            }
+            .search-results-item {
+                padding: 1rem;
+            }
         }
-
         /* Custom Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 8px;
@@ -308,77 +338,98 @@
         ::-webkit-scrollbar-thumb:hover {
             background-color: rgba(255, 255, 255, 0.5);
         }
-
         /* For Firefox */
         * {
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2);
         }
-
         /* Custom Language Selector Styling */
         .language-selector-container {
             position: absolute;
             top: 1.5rem;
-            right: 1.5rem;
+            right: 1rem;
             z-index: 20;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out forwards;
+            animation-delay: 0.8s; /* Adjusted delay */
         }
+        /* Beautified Dropdown Styles */
         .custom-dropdown {
             position: relative;
             display: inline-block;
         }
         .dropdown-button {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            color: #ffffff;
-            font-size: 0.875rem;
-            font-weight: 500;
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0.6rem 2.2rem 0.6rem 1rem; /* More right padding for icon */
+            font-size: 0.45rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(129,140,248,0.15);
             cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 1.5em;
-            padding-right: 2.5rem;
-            transition: all 0.3s ease;
+            transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+            outline: none;
+            position: relative;
         }
-        .dropdown-button:hover {
-            border-color: #a78bfa;
-            box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+        .dropdown-button:after {
+            content: "\f078";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.1em;
+            color: #a78bfa;
+            pointer-events: none;
+        }
+        .dropdown-button:hover, .dropdown-button:focus {
+            background: linear-gradient(90deg, #3b82f6 0%, #818cf8 100%);
+            box-shadow: 0 4px 16px rgba(129,140,248,0.25);
+            transform: translateY(-2px);
         }
         .dropdown-content {
             display: none;
             position: absolute;
             right: 0;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            min-width: 120px;
+            top: 110%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(129,140,248,0.25);
+            min-width: 140px;
             z-index: 30;
+            animation: slideInFromTop 0.3s ease-out forwards;
+            border: 1px solid rgba(129,140,248,0.18);
+            padding: 0.5rem 0;
         }
         .dropdown-content a {
-            display: block;
-            padding: 0.75rem 1rem;
-            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            padding: 0.7rem 1.2rem;
+            color: #a78bfa;
             text-decoration: none;
-            font-size: 0.875rem;
-            transition: background-color 0.2s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: background 0.2s, color 0.2s, transform 0.2s;
         }
         .dropdown-content a:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: linear-gradient(90deg, #818cf8 0%, #3b82f6 100%);
+            color: #fff;
+            transform: translateX(-5px);
         }
         .dropdown-content.active {
             display: block;
         }
         @media (max-width: 640px) {
-            .language-selector-container {
-                top: 1rem;
-                right: 1rem;
+            .dropdown-button {
+                font-size: 0.9rem;
+                padding: 0.5rem 1.2rem 0.5rem 0.8rem;
+            }
+            .dropdown-content a {
+                font-size: 0.9rem;
+                padding: 0.6rem 1rem;
             }
         }
     </style>
@@ -397,14 +448,14 @@
     </div>
     
     <h1 class="welcome-title" id="page-title">MTR ETA Search</h1>
-
+    
     <div id="favorites-container" class="acrylic-box">
         <h3 id="favorites-title">Favorite Stations</h3>
         <div id="favorites-list" class="favorites-list">
             <p id="no-favorites-message">No favorite stations yet. Click the star to add one!</p>
         </div>
     </div>
-
+    
     <div class="search-container acrylic-box flex flex-col items-center">
         <input type="text" id="station-search" class="search-input" placeholder="Search for a station..." />
         <div id="search-results" class="search-results"></div>
@@ -424,13 +475,11 @@
             const dropdownContent = document.getElementById('dropdown-content');
             const favoritesContainer = document.getElementById('favorites-container');
             const favoritesList = document.getElementById('favorites-list');
-
             let currentRefreshInterval = null;
             let selectedStation = null;
             let currentLanguage = 'en';
             let stations = [];
             let favoriteStations = [];
-
             // Translations for key UI text
             const translations = {
                 en: {
@@ -444,7 +493,6 @@
                     to: 'To',
                     min: 'min',
                     plat: 'Plat',
-                    arrival: 'Arrival',
                     favoritesTitle: 'Favorite Stations',
                     noFavorites: 'No favorite stations yet. Click the star to add one!'
                 },
@@ -459,7 +507,6 @@
                     to: '往',
                     min: '分鐘',
                     plat: '月台',
-                    arrival: '到達',
                     favoritesTitle: '最愛車站',
                     noFavorites: '尚未有最愛車站。點擊星號以新增。'
                 },
@@ -474,7 +521,6 @@
                     to: '往',
                     min: '分钟',
                     plat: '站台',
-                    arrival: '到达',
                     favoritesTitle: '收藏车站',
                     noFavorites: '暂无收藏车站。点击星号以添加。'
                 },
@@ -489,7 +535,6 @@
                     to: '行き',
                     min: '分',
                     plat: '番線',
-                    arrival: '到着',
                     favoritesTitle: 'お気に入り駅',
                     noFavorites: 'お気に入りの駅はまだありません。星をクリックして追加してください！'
                 }
@@ -508,7 +553,6 @@
                 'KTL': { name_en: 'Kwun Tong Line', name_zh: '觀塘綫', name_zh_Hans: '观塘线', name_ja: '観塘線' },
                 'DRL': { name_en: 'Disneyland Resort Line', name_zh: '迪士尼綫', name_zh_Hans: '迪士尼线', name_ja: 'ディズニーランドリゾート線' }
             };
-
             const stationMap = {
                 'HOK': { name_en: 'Hong Kong', name_zh: '香港', name_zh_Hans: '香港', name_ja: '香港', lines: ['AEL', 'TCL'] },
                 'KOW': { name_en: 'Kowloon', name_zh: '九龍', name_zh_Hans: '九龙', name_ja: '九龍', lines: ['AEL', 'TCL'] },
@@ -608,7 +652,6 @@
                 'CHW': { name_en: 'Chai Wan', name_zh: '柴灣', name_zh_Hans: '柴湾', name_ja: '柴湾', lines: ['ISL'] },
                 'DIS': { name_en: 'Disneyland Resort', name_zh: '迪士尼', name_zh_Hans: '迪士尼', name_ja: 'ディズニー', lines: ['DRL'] }
             };
-
             // Function to load favorites from localStorage
             const loadFavorites = () => {
                 const favs = localStorage.getItem('mtrFavoriteStations');
@@ -617,7 +660,6 @@
                 }
                 renderFavorites();
             };
-
             // Function to save favorites to localStorage
             const saveFavorites = () => {
                 localStorage.setItem('mtrFavoriteStations', JSON.stringify(favoriteStations));
@@ -644,13 +686,11 @@
                     });
                 }
             };
-
             // Function to toggle a station as favorite
             const toggleFavorite = (stationCode, lineCode) => {
                 const favId = `${stationCode}-${lineCode}`;
                 const index = favoriteStations.indexOf(favId);
                 const isCurrentlyFavorited = index > -1;
-
                 if (isCurrentlyFavorited) {
                     favoriteStations.splice(index, 1); // Remove from favorites
                 } else {
@@ -661,18 +701,15 @@
                 renderFavorites();
                 
                 const newFavoritedState = !isCurrentlyFavorited;
-
                 // Update star in the currently displayed card if it matches
-                const currentStar = document.querySelector(`.station-info-header .fav-star[data-station-code="${stationCode}"][data-line-code="${lineCode}"]`);
+                const currentStar = document.querySelector(`.station-card-header .fav-star[data-station-code="${stationCode}"][data-line-code="${lineCode}"]`);
                 if (currentStar) {
                     currentStar.classList.toggle('favorited', newFavoritedState);
                 }
-
                 // Also update stars in search results (if they are visible)
                 const searchResultStars = document.querySelectorAll(`.search-results-item .fav-star[data-station-code="${stationCode}"][data-line-code="${lineCode}"]`);
                 searchResultStars.forEach(star => star.classList.toggle('favorited', newFavoritedState));
             };
-
             // Function to set the language
             const setLanguage = (lang) => {
                 currentLanguage = lang;
@@ -691,34 +728,31 @@
                     fetchAndDisplayMtrData(selectedStation.line, selectedStation.sta);
                 }
             };
-
             // Function to get station or line name based on language
             const getStationName = (stationCode) => {
                 const station = stationMap[stationCode];
                 if (!station) return stationCode;
                 return station[`name_${currentLanguage}`] || station.name_en;
             };
-
             const getLineName = (lineCode) => {
                 const line = lineMap[lineCode];
                 if (!line) return lineCode;
                 return line[`name_${currentLanguage}`] || line.name_en;
             };
-
             // Populate stations array from stationMap
             stations = Object.keys(stationMap).map(code => ({
                 code: code,
                 ...stationMap[code]
             }));
-
             // Function to handle search input
+            let lastResultsCount = 0;
             const handleSearchInput = () => {
                 const query = searchInput.value.toLowerCase();
                 if (query.length === 0) {
-                    searchResultsContainer.style.display = 'none';
+                    searchResultsContainer.classList.remove('show');
+                    lastResultsCount = 0;
                     return;
                 }
-
                 const filteredStations = stations.filter(station =>
                     station.name_en.toLowerCase().includes(query) ||
                     station.name_zh.toLowerCase().includes(query) ||
@@ -726,11 +760,12 @@
                     station.name_ja.toLowerCase().includes(query) ||
                     station.code.toLowerCase().includes(query)
                 );
-
                 searchResultsContainer.innerHTML = '';
+                let newResultsCount = 0;
                 if (filteredStations.length > 0) {
                     filteredStations.forEach(station => {
                         station.lines.forEach(lineCode => {
+                            newResultsCount++;
                             const favId = `${station.code}-${lineCode}`;
                             const isFavorited = favoriteStations.includes(favId);
                             const item = document.createElement('div');
@@ -738,10 +773,8 @@
                             item.onclick = () => {
                                 selectStation(lineCode, station.code);
                             };
-                            
                             const stationName = document.createElement('span');
                             stationName.textContent = `${getStationName(station.code)} (${getLineName(lineCode)})`;
-
                             const star = document.createElement('i');
                             star.className = `fas fa-star fav-star ${isFavorited ? 'favorited' : ''}`;
                             star.dataset.stationCode = station.code;
@@ -750,17 +783,37 @@
                                 e.stopPropagation(); 
                                 toggleFavorite(station.code, lineCode);
                             };
-                            
                             item.appendChild(stationName);
                             item.appendChild(star);
                             searchResultsContainer.appendChild(item);
                         });
                     });
                     searchResultsContainer.style.display = 'block';
+                    searchResultsContainer.classList.add('show');
+                    lastResultsCount = newResultsCount;
                 } else {
+                    searchResultsContainer.classList.remove('show');
                     searchResultsContainer.style.display = 'none';
+                    lastResultsCount = 0;
                 }
             };
+            searchInput.addEventListener('input', handleSearchInput);
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value.trim().toLowerCase();
+                    if (query.length > 0) {
+                        // Find exact match (case-insensitive) for station name
+                        const exactStations = stations.filter(station => {
+                            return [station.name_en, station.name_zh, station.name_zh_Hans, station.name_ja]
+                                .some(name => name && name.toLowerCase() === query);
+                        });
+                        if (exactStations.length === 1 && exactStations[0].lines.length === 1) {
+                            selectStation(exactStations[0].lines[0], exactStations[0].code);
+                            searchResultsContainer.style.display = 'none';
+                        }
+                    }
+                }
+            });
             
             // Function to handle station selection
             const selectStation = (line, stationCode) => {
@@ -774,8 +827,7 @@
                 fetchAndDisplayMtrData(line, stationCode);
                 currentRefreshInterval = setInterval(() => fetchAndDisplayMtrData(line, stationCode), 20000);
             };
-
-            // Function to fetch and display MTR data with improved UI
+            // New function to fetch and display MTR data, based on user's logic
             const fetchAndDisplayMtrData = async (lineCode, stationCode) => {
                 mtrDataContainer.innerHTML = '<div class="loader"></div>';
                 try {
@@ -791,60 +843,52 @@
                     const lineName = getLineName(lineCode);
                     const favId = `${stationCode}-${lineCode}`;
                     const isFavorited = favoriteStations.includes(favId);
-
                     let stationHtml = `
-                        <div class="station-info-card">
-                            <div class="station-info-header">
+                        <div class="station-card">
+                            <div class="station-card-header">
                                 <h4>${stationName} - ${lineName}</h4>
-                                <i class="fas fa-star fa-lg fav-star ${isFavorited ? 'favorited' : ''}" data-station-code="${stationCode}" data-line-code="${lineCode}"></i>
+                                <i class="fas fa-star fav-star ${isFavorited ? 'favorited' : ''}" data-station-code="${stationCode}" data-line-code="${lineCode}"></i>
                             </div>
+                            <div class="eta-list">
                     `;
                     let hasData = false;
-
-                    const renderTrains = (trains, direction, iconClass) => {
+                    const renderTrains = (trains, direction) => {
                         if (trains && trains.length > 0) {
                             hasData = true;
-                            let sectionHtml = `<div class="direction-section">
-                                <h5 class="direction-header"><i class="fas ${iconClass}"></i> ${direction}</h5>`;
-                            trains.forEach(train => {
+                            let sectionHtml = `<h5 class="font-bold mt-2 mb-1">${direction}</h5>`;
+                            trains.forEach((train, idx) => {
                                 let destinationStation = stationMap[train.dest];
                                 if (destinationStation) {
-                                    let destinationName = getStationName(train.dest);
-                                    let arrivalMins = calculateMinutes(train.time);
+                                    let destinationName = destinationStation[`name_${currentLanguage}`] || destinationStation.name_en;
+                                    let minutes = calculateMinutes(train.time);
+                                    // FIX: green indicator for 1 minute or less
+                                    let etaClass = minutes <= 1 ? 'eta-green' : (minutes <= 5 ? 'eta-yellow' : 'eta-red');
+                                    let icon = minutes <= 1 ? '<i class="fas fa-bolt eta-icon"></i>' : (minutes <= 5 ? '<i class="fas fa-clock eta-icon"></i>' : '<i class="fas fa-hourglass-half eta-icon"></i>');
+                                    let arrivalText = `${minutes} ${translations[currentLanguage].min}`;
+                                    // Progress bar for the first train only
+                                    let progressBar = idx === 0 ? `<div class="eta-progress" style="width:${Math.max(100-minutes*10,10)}%"></div>` : '';
                                     sectionHtml += `
-                                        <div class="train-arrival-item">
-                                            <div class="train-destination">
-                                                <i class="fas fa-train"></i>
-                                                <span>${translations[currentLanguage].to} <strong class="line-${train.dest}">${destinationName}</strong></span>
-                                            </div>
-                                            <div class="train-details">
-                                                <div class="platform-info">
-                                                    <span>${translations[currentLanguage].plat}</span>
-                                                    <span>${train.plat}</span>
-                                                </div>
-                                                <div class="time-info">
-                                                    <span>${translations[currentLanguage].arrival}</span>
-                                                    <span class="time-badge">${arrivalMins} ${translations[currentLanguage].min}</span>
-                                                </div>
-                                            </div>
+                                        <div class="eta-item">
+                                            <span>${translations[currentLanguage].to} ${destinationName}</span>
+                                            <span class="eta-indicator ${etaClass}">${icon}${arrivalText} (${translations[currentLanguage].plat} ${train.plat})</span>
+                                            ${progressBar}
                                         </div>
                                     `;
                                 }
                             });
-                            sectionHtml += `</div>`;
                             return sectionHtml;
                         }
                         return '';
                     };
-
-                    stationHtml += renderTrains(lineStationData?.UP, translations[currentLanguage].upTrains, 'fa-arrow-up');
-                    stationHtml += renderTrains(lineStationData?.DOWN, translations[currentLanguage].downTrains, 'fa-arrow-down');
-
+                    stationHtml += renderTrains(lineStationData?.UP, translations[currentLanguage].upTrains);
+                    stationHtml += renderTrains(lineStationData?.DOWN, translations[currentLanguage].downTrains);
                     if (!hasData) {
-                        stationHtml += `<p class="opacity-70 text-center py-4">${translations[currentLanguage].stationClosed}</p>`;
+                        stationHtml += `<p class="opacity-70">${translations[currentLanguage].stationClosed}</p>`;
                     }
-
-                    stationHtml += `</div>`;
+                    stationHtml += `
+                            </div>
+                        </div>
+                    `;
                     mtrDataContainer.innerHTML = stationHtml;
                     
                     // Re-attach event listener for the new star icon
@@ -854,13 +898,11 @@
                             toggleFavorite(stationCode, lineCode);
                         });
                     }
-
                 } catch (error) {
                     console.error('Error fetching MTR data:', error);
                     mtrDataContainer.innerHTML = `<p class="text-red-400 text-center">Failed to load ETA data. Please try again later.</p>`;
                 }
             };
-
             // Function to calculate minutes from now
             const calculateMinutes = (timeStr) => {
                 const trainTime = new Date(timeStr).getTime();
@@ -868,19 +910,16 @@
                 const diff = Math.round((trainTime - now) / 60000);
                 return diff > 0 ? diff : 0;
             };
-
             // Event Listeners
             dropdownButton.addEventListener('click', () => {
                 dropdownContent.classList.toggle('active');
             });
-
             dropdownContent.addEventListener('click', (e) => {
                 if (e.target.tagName === 'A') {
                     setLanguage(e.target.dataset.lang);
                     dropdownContent.classList.remove('active');
                 }
             });
-
             document.addEventListener('click', (e) => {
                 if (!dropdownButton.contains(e.target) && !dropdownContent.contains(e.target)) {
                     dropdownContent.classList.remove('active');
@@ -889,8 +928,23 @@
                     searchResultsContainer.style.display = 'none';
                 }
             });
-
             searchInput.addEventListener('input', handleSearchInput);
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const query = searchInput.value.trim().toLowerCase();
+                    if (query.length > 0) {
+                        // Find exact match (case-insensitive) for station name
+                        const exactStations = stations.filter(station => {
+                            return [station.name_en, station.name_zh, station.name_zh_Hans, station.name_ja]
+                                .some(name => name && name.toLowerCase() === query);
+                        });
+                        if (exactStations.length === 1 && exactStations[0].lines.length === 1) {
+                            selectStation(exactStations[0].lines[0], exactStations[0].code);
+                            searchResultsContainer.style.display = 'none';
+                        }
+                    }
+                }
+            });
             
             // Fade in title on scroll
             const title = document.querySelector('.welcome-title');
@@ -907,7 +961,6 @@
                 });
             }, observerOptions);
             observer.observe(title);
-
             // Set language from local storage or default and load favorites
             const savedLanguage = localStorage.getItem('languagePreference');
             if (savedLanguage) {

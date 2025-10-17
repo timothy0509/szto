@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Calendar</title>
+    <!-- Use Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            background-color: #f0f4f8; /* A light, clean background */
+        }
+        /* Custom CSS for a cool entry animation */
+        @keyframes slideInUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .animate-slide-in {
+            animation: slideInUp 0.5s ease-out forwards;
+        }
+
+        /* Custom scrollbar for a clean look */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4 md:p-8">
+
+    <!-- Main App Container -->
+    <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 w-full max-w-6xl transform transition-all duration-500 ease-in-out hover:scale-[1.01]">
+
+        <!-- Header Section -->
+        <div class="flex flex-col items-center justify-center text-center mb-6 md:mb-8">
+            <h1 class="text-3xl md:text-5xl font-bold text-gray-800 tracking-tight">
+                My Calendar
+            </h1>
+            <p class="mt-2 text-md md:text-lg text-gray-500">
+                Plan your month, one day at a time.
+            </p>
+        </div>
+
+        <!-- Calendar and Task Input -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            
+            <!-- Calendar Display Area -->
+            <div class="bg-gray-50 p-6 rounded-2xl shadow-inner animate-slide-in">
+                
+                <!-- Calendar Controls -->
+                <div class="flex items-center justify-between mb-4">
+                    <button id="prev-month-btn" class="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 id="month-year" class="text-xl md:text-2xl font-bold text-gray-800">
+                        <!-- Dynamic month and year -->
+                    </h2>
+                    <button id="next-month-btn" class="text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Day of the week labels -->
+                <div class="grid grid-cols-7 text-center text-sm font-semibold text-gray-500 mb-2">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div id="calendar-grid-container" class="grid grid-cols-7 gap-1 text-center">
+                    <!-- Calendar days will be dynamically added here by JS -->
+                </div>
+
+                <!-- Task List for Selected Day -->
+                <div class="mt-8">
+                    <h3 id="current-date-title" class="text-xl md:text-2xl font-semibold text-gray-700 mb-4 transition-colors duration-300">
+                        <!-- Dynamic Date Title -->
+                    </h3>
+                    <ul id="task-list" class="space-y-3 max-h-48 overflow-y-auto custom-scrollbar">
+                        <!-- Dynamic tasks will be rendered here -->
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Task Input Form -->
+            <div class="bg-gradient-to-br from-emerald-400 to-cyan-500 p-6 rounded-2xl shadow-xl animate-slide-in" style="animation-delay: 0.2s;">
+                <h2 class="text-2xl md:text-3xl font-bold text-white mb-6">
+                    Add a New Task
+                </h2>
+                <form id="task-form" class="space-y-4">
+                    <div>
+                        <label for="task-text" class="block text-sm font-medium text-white mb-2">Task Description</label>
+                        <input type="text" id="task-text" placeholder="e.g., Finish project proposal" required
+                               class="w-full px-4 py-3 rounded-xl border border-transparent focus:border-cyan-300 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition-colors duration-300 placeholder-gray-400 text-gray-800">
+                    </div>
+                    <div>
+                        <label for="task-date" class="block text-sm font-medium text-white mb-2">Date</label>
+                        <input type="date" id="task-date" required
+                               class="w-full px-4 py-3 rounded-xl border border-transparent focus:border-cyan-300 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition-colors duration-300 text-gray-800">
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label for="task-hour" class="block text-sm font-medium text-white mb-2">Hour</label>
+                            <input type="text" id="task-hour" placeholder="1-12" required
+                                   class="w-full px-4 py-3 rounded-xl border border-transparent focus:border-cyan-300 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition-colors duration-300 placeholder-gray-400 text-gray-800">
+                        </div>
+                        <div>
+                            <label for="task-minute" class="block text-sm font-medium text-white mb-2">Minute</label>
+                            <input type="text" id="task-minute" placeholder="00-59" required
+                                   class="w-full px-4 py-3 rounded-xl border border-transparent focus:border-cyan-300 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition-colors duration-300 placeholder-gray-400 text-gray-800">
+                        </div>
+                        <div>
+                            <label for="task-ampm" class="block text-sm font-medium text-white mb-2">AM/PM</label>
+                            <select id="task-ampm" required
+                                    class="w-full px-4 py-3 rounded-xl border border-transparent focus:border-cyan-300 focus:ring-2 focus:ring-cyan-200 focus:outline-none transition-colors duration-300 text-gray-800">
+                                <option value="">Select</option>
+                                <option value="AM">AM</option>
+                                <option value="PM">PM</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit"
+                            class="w-full bg-white text-emerald-600 font-bold py-3 px-4 rounded-xl shadow-lg hover:bg-emerald-50 transition-all duration-300 ease-in-out transform hover:scale-105">
+                        Add Task
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get DOM elements
+            const calendarGridContainer = document.getElementById('calendar-grid-container');
+            const monthYearTitle = document.getElementById('month-year');
+            const prevMonthBtn = document.getElementById('prev-month-btn');
+            const nextMonthBtn = document.getElementById('next-month-btn');
+            const currentDayTitle = document.getElementById('current-date-title');
+            const taskList = document.getElementById('task-list');
+            const taskForm = document.getElementById('task-form');
+            const taskTextInput = document.getElementById('task-text');
+            const taskDateInput = document.getElementById('task-date');
+            const taskHourInput = document.getElementById('task-hour');
+            const taskMinuteInput = document.getElementById('task-minute');
+            const taskAmpmInput = document.getElementById('task-ampm');
+            const submitBtn = taskForm.querySelector('button[type="submit"]');
+
+            // Calendar state
+            let today = new Date();
+            // Normalize today's date to midnight for accurate comparison
+            today.setHours(0, 0, 0, 0); 
+
+            let currentDate = new Date();
+            let currentMonth = currentDate.getMonth();
+            let currentYear = currentDate.getFullYear();
+            let selectedDate = new Date();
+            let previousSelected = null;
+
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+            // Function to save data to localStorage
+            const saveSchedule = (schedule) => {
+                localStorage.setItem('scheduleData', JSON.stringify(schedule));
+            };
+
+            // Function to load data from localStorage
+            const loadSchedule = () => {
+                const data = localStorage.getItem('scheduleData');
+                return data ? JSON.parse(data) : {};
+            };
+
+            let scheduleData = loadSchedule();
+
+            // Function to format date as YYYY-MM-DD
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            // Function to render tasks for the selected date
+            const renderTasks = (dateString) => {
+                taskList.innerHTML = '';
+                const tasks = scheduleData[dateString] || [];
+                
+                if (tasks.length === 0) {
+                    taskList.innerHTML = `
+                        <li class="p-4 bg-gray-100 text-gray-400 rounded-xl text-center shadow-sm">
+                            No tasks for this day. Add one below!
+                        </li>
+                    `;
+                    return;
+                }
+
+                const isPastDate = new Date(dateString) < today;
+
+                tasks.forEach((task, index) => {
+                    const taskItem = document.createElement('li');
+                    taskItem.className = 'flex items-center justify-between p-3 rounded-xl shadow-sm transition-all duration-300 ease-in-out transform hover:scale-[1.01] hover:shadow-md animate-slide-in';
+                    taskItem.classList.add(task.completed ? 'bg-green-100' : 'bg-white');
+                    
+                    const taskContent = document.createElement('div');
+                    const taskDescription = document.createElement('span');
+                    taskDescription.textContent = task.text;
+                    taskDescription.className = 'font-medium text-gray-800 text-sm';
+                    if (task.completed) {
+                        taskDescription.classList.add('line-through', 'text-gray-500');
+                    }
+
+                    if (task.time) {
+                        const taskTime = document.createElement('span');
+                        taskTime.textContent = task.time;
+                        taskTime.className = 'text-xs text-gray-500 mr-2';
+                        if (task.completed) {
+                            taskTime.classList.add('line-through');
+                        }
+                        taskContent.appendChild(taskTime);
+                    }
+                    taskContent.appendChild(taskDescription);
+
+                    const rightSide = document.createElement('div');
+                    rightSide.className = 'flex items-center space-x-2';
+
+                    // Checkbox to mark as completed
+                    const completeBtn = document.createElement('button');
+                    completeBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ${task.completed ? 'text-green-500' : 'text-gray-400 hover:text-green-500'}" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    `;
+                    completeBtn.onclick = () => {
+                        task.completed = !task.completed;
+                        saveSchedule(scheduleData);
+                        renderCalendar(currentMonth, currentYear);
+                    };
+
+                    rightSide.appendChild(completeBtn);
+
+                    // Only add the delete button if it's not a past date
+                    if (!isPastDate) {
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 hover:text-red-500 transition-colors duration-200" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                            </svg>
+                        `;
+                        deleteBtn.className = 'ml-2';
+                        deleteBtn.onclick = () => {
+                            const tasksForDay = scheduleData[dateString];
+                            tasksForDay.splice(index, 1);
+                            saveSchedule(scheduleData);
+                            renderCalendar(currentMonth, currentYear);
+                        };
+                        rightSide.appendChild(deleteBtn);
+                    }
+                    
+                    taskItem.appendChild(taskContent);
+                    taskItem.appendChild(rightSide);
+                    taskList.appendChild(taskItem);
+                });
+            };
+
+            // Function to select a day and render tasks
+            const selectDate = (date) => {
+                selectedDate = date;
+                const dateString = formatDate(date);
+
+                // Check if the selected date is in the past
+                const isPastDate = selectedDate < today;
+
+                // Disable or enable the form based on whether the date is in the past
+                taskTextInput.disabled = isPastDate;
+                taskDateInput.disabled = isPastDate;
+                taskHourInput.disabled = isPastDate;
+                taskMinuteInput.disabled = isPastDate;
+                taskAmpmInput.disabled = isPastDate;
+                submitBtn.disabled = isPastDate;
+                submitBtn.textContent = isPastDate ? 'View Only' : 'Add Task';
+                submitBtn.classList.toggle('opacity-50', isPastDate);
+                submitBtn.classList.toggle('hover:scale-105', !isPastDate);
+                submitBtn.classList.toggle('hover:bg-emerald-50', !isPastDate);
+
+                // Sync the date input
+                taskDateInput.value = dateString;
+
+                // Handle old selected
+                if (previousSelected && previousSelected.getMonth() === selectedDate.getMonth() && previousSelected.getFullYear() === selectedDate.getFullYear()) {
+                    const oldEl = document.getElementById(`day-${previousSelected.getDate()}`);
+                    if (oldEl) {
+                        oldEl.classList.remove('bg-gray-500', 'text-white', 'shadow-lg');
+                        const oldBgClass = JSON.parse(oldEl.dataset.bgClass || '[]');
+                        if (oldBgClass.length > 0) oldEl.classList.add(...oldBgClass);
+                        oldEl.classList.add('hover:bg-gray-200');
+                    }
+                }
+
+                // Handle new selected
+                const dayEl = document.getElementById(`day-${date.getDate()}`);
+                if (dayEl) {
+                    dayEl.classList.remove('bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'text-white');
+                    dayEl.classList.remove('hover:bg-gray-200');
+                    dayEl.classList.add('bg-gray-500', 'text-white', 'shadow-lg');
+                }
+
+                previousSelected = selectedDate;
+
+                currentDayTitle.textContent = selectedDate.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                renderTasks(dateString);
+            };
+
+            // Function to render the calendar grid
+            const renderCalendar = (month, year) => {
+                calendarGridContainer.innerHTML = '';
+                monthYearTitle.textContent = `${monthNames[month]} ${year}`;
+
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                // Add empty divs for preceding days
+                for (let i = 0; i < firstDayOfMonth; i++) {
+                    const emptyDay = document.createElement('div');
+                    calendarGridContainer.appendChild(emptyDay);
+                }
+
+                // Add actual day divs
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayEl = document.createElement('div');
+                    dayEl.id = `day-${day}`;
+                    dayEl.textContent = day;
+                    dayEl.className = 'calendar-day p-3 rounded-xl cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-200';
+                    dayEl.onclick = () => selectDate(new Date(year, month, day));
+                    
+                    // Determine background color based on date and tasks
+                    const dateToCheck = new Date(year, month, day);
+                    dateToCheck.setHours(0, 0, 0, 0);
+                    const dateString = formatDate(dateToCheck);
+                    const tasks = scheduleData[dateString] || [];
+                    let bgClass = [];
+                    if (dateToCheck.getTime() === today.getTime()) {
+                        bgClass = ['bg-blue-500', 'text-white'];
+                    } else if (tasks.length > 0) {
+                        const completed = tasks.filter(t => t.completed).length;
+                        if (completed === tasks.length) {
+                            bgClass = ['bg-green-500'];
+                        } else if (completed >= tasks.length / 2) {
+                            bgClass = ['bg-yellow-500'];
+                        } else {
+                            bgClass = ['bg-red-500'];
+                        }
+                    }
+                    dayEl.dataset.bgClass = JSON.stringify(bgClass);
+                    if (bgClass.length > 0) dayEl.classList.add(...bgClass);
+                    
+                    // Add a special class for past dates for styling
+                    if (dateToCheck < today) {
+                        dayEl.classList.add('opacity-50');
+                    }
+                    
+                    calendarGridContainer.appendChild(dayEl);
+                }
+                
+                // Select the selectedDate if it's in the current month view
+                if (month === selectedDate.getMonth() && year === selectedDate.getFullYear()) {
+                    selectDate(selectedDate);
+                } else {
+                    // Set the form to view-only for months in the past
+                    const firstDayOfRenderedMonth = new Date(year, month, 1);
+                    firstDayOfRenderedMonth.setHours(0, 0, 0, 0);
+                    const isMonthInPast = firstDayOfRenderedMonth < today;
+                    taskTextInput.disabled = isMonthInPast;
+                    taskDateInput.disabled = isMonthInPast; 
+                    taskHourInput.disabled = isMonthInPast;
+                    taskMinuteInput.disabled = isMonthInPast;
+                    taskAmpmInput.disabled = isMonthInPast;
+                    submitBtn.disabled = isMonthInPast;
+                    submitBtn.textContent = isMonthInPast ? 'View Only' : 'Add Task';
+                    submitBtn.classList.toggle('opacity-50', isMonthInPast);
+                    submitBtn.classList.toggle('hover:scale-105', !isMonthInPast);
+                    submitBtn.classList.toggle('hover:bg-emerald-50', !isMonthInPast);
+                    
+                    currentDayTitle.textContent = "Select a day";
+                    taskList.innerHTML = `<li class="p-4 bg-gray-100 text-gray-400 rounded-xl text-center shadow-sm">
+                        Select a day on the calendar to see tasks.
+                    </li>`;
+                }
+            };
+
+            // Event listeners for month navigation
+            prevMonthBtn.addEventListener('click', () => {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                renderCalendar(currentMonth, currentYear);
+            });
+
+            nextMonthBtn.addEventListener('click', () => {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                renderCalendar(currentMonth, currentYear);
+            });
+
+            // Handle date input change
+            taskDateInput.addEventListener('change', () => {
+                const newDate = new Date(taskDateInput.value);
+                selectedDate = newDate;
+                currentMonth = newDate.getMonth();
+                currentYear = newDate.getFullYear();
+                renderCalendar(currentMonth, currentYear);
+            });
+
+            // Handle form submission
+            taskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Get the selected date from the input
+                let taskSelectedDate = new Date(taskDateInput.value);
+                const dateString = formatDate(taskSelectedDate);
+                // Check if the selected date is in the past before adding a new task
+                const isPastDate = taskSelectedDate < today;
+                
+                if (isPastDate) {
+                    // Do not add task for a past date
+                    return;
+                }
+
+                // Validate time inputs
+                const hour = taskHourInput.value.trim();
+                const minute = taskMinuteInput.value.trim();
+                const ampm = taskAmpmInput.value;
+                if (!/^(1[0-2]|[1-9])$/.test(hour)) {
+                    alert('Please enter a valid hour (1-12).');
+                    return;
+                }
+                if (!/^([0-5][0-9])$/.test(minute)) {
+                    alert('Please enter a valid minute (00-59).');
+                    return;
+                }
+                if (!ampm) {
+                    alert('Please select AM or PM.');
+                    return;
+                }
+
+                const time = `${hour.padStart(2, '0')}:${minute} ${ampm}`;
+
+                const newTask = {
+                    text: taskTextInput.value,
+                    time: time,
+                    completed: false
+                };
+
+                if (!scheduleData[dateString]) {
+                    scheduleData[dateString] = [];
+                }
+                scheduleData[dateString].push(newTask);
+                saveSchedule(scheduleData);
+                
+                // Update selected date and re-render calendar
+                selectedDate = taskSelectedDate;
+                renderCalendar(currentMonth, currentYear);
+                
+                // Reset form inputs
+                taskTextInput.value = '';
+                taskHourInput.value = '';
+                taskMinuteInput.value = '';
+                taskAmpmInput.value = '';
+            });
+
+            // Initialize the app
+            taskDateInput.value = formatDate(selectedDate);
+            renderCalendar(currentMonth, currentYear);
+        });
+    </script>
+
+</body>
+</html>

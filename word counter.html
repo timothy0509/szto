@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Language Word Counter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font and base colors for the light theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        /* Styling for the focus state of the textarea */
+        textarea:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5); /* indigo-500 with opacity */
+            border-color: transparent;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center min-h-screen">
+
+    <!-- Main Container -->
+    <div class="bg-white shadow-xl rounded-2xl p-6 md:p-10 w-full max-w-4xl">
+        <!-- Header with Title and Controls -->
+        <header class="mb-6 md:mb-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <h1 id="app-title" class="text-3xl md:text-4xl font-extrabold text-gray-900">Word Counter</h1>
+            <div class="flex items-center space-x-4">
+                <!-- Language Selector -->
+                <select id="lang-selector" class="bg-gray-100 text-gray-800 py-2 px-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                    <option value="en">English</option>
+                    <option value="zh-tw">繁體中文</option>
+                    <option value="zh-cn">简体中文</option>
+                    <option value="ja">日本語</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Textarea for User Input -->
+        <textarea id="text-input" rows="10" class="w-full text-lg p-4 rounded-xl resize-none border-2 border-gray-300 focus:border-transparent focus:ring-2 focus:ring-indigo-500" placeholder="Enter your text here..."></textarea>
+
+        <!-- Count Display Area -->
+        <div class="mt-6 md:mt-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Words Count -->
+            <div class="bg-gray-100 p-4 rounded-xl flex flex-col items-center shadow-inner">
+                <p id="words-label" class="text-sm font-semibold text-gray-600">Words</p>
+                <p id="word-count" class="text-2xl font-bold mt-1 text-indigo-600">0</p>
+            </div>
+            <!-- Characters Count -->
+            <div class="bg-gray-100 p-4 rounded-xl flex flex-col items-center shadow-inner">
+                <p id="chars-label" class="text-sm font-semibold text-gray-600">Characters</p>
+                <p id="char-count" class="text-2xl font-bold mt-1 text-indigo-600">0</p>
+            </div>
+            <!-- Blanks Count -->
+            <div class="bg-gray-100 p-4 rounded-xl flex flex-col items-center shadow-inner">
+                <p id="blanks-label" class="text-sm font-semibold text-gray-600">Blanks</p>
+                <p id="blank-count" class="text-2xl font-bold mt-1 text-indigo-600">0</p>
+            </div>
+            <!-- Symbols Count -->
+            <div class="bg-gray-100 p-4 rounded-xl flex flex-col items-center shadow-inner">
+                <p id="symbols-label" class="text-sm font-semibold text-gray-600">Symbols</p>
+                <p id="symbol-count" class="text-2xl font-bold mt-1 text-indigo-600">0</p>
+            </div>
+            <!-- Sentences Count -->
+            <div class="bg-gray-100 p-4 rounded-xl flex flex-col items-center shadow-inner">
+                <p id="sentences-label" class="text-sm font-semibold text-gray-600">Sentences</p>
+                <p id="sentence-count" class="text-2xl font-bold mt-1 text-indigo-600">0</p>
+            </div>
+        </div>
+
+        <p class="mt-6 text-sm text-gray-500 text-center">
+            *Word count for East Asian languages is based on characters, as these languages do not use spaces to separate words.
+        </p>
+    </div>
+
+    <!-- JavaScript for Counting and UI Logic -->
+    <script>
+        // Get references to all necessary DOM elements
+        const textInput = document.getElementById('text-input');
+        const wordCountDisplay = document.getElementById('word-count');
+        const charCountDisplay = document.getElementById('char-count');
+        const blankCountDisplay = document.getElementById('blank-count');
+        const symbolCountDisplay = document.getElementById('symbol-count');
+        const sentenceCountDisplay = document.getElementById('sentence-count');
+        const langSelector = document.getElementById('lang-selector');
+        
+        // Language strings for UI elements
+        const translations = {
+            en: {
+                title: 'Word Counter',
+                placeholder: 'Enter your text here...',
+                wordsLabel: 'Words',
+                charsLabel: 'Characters',
+                blanksLabel: 'Blanks',
+                symbolsLabel: 'Symbols',
+                sentencesLabel: 'Sentences',
+                note: '*Word count for East Asian languages is based on characters, as these languages do not use spaces to separate words.'
+            },
+            'zh-tw': {
+                title: '字數統計',
+                placeholder: '請在此輸入您的文字...',
+                wordsLabel: '字數',
+                charsLabel: '字符',
+                blanksLabel: '空白',
+                symbolsLabel: '符號',
+                sentencesLabel: '句子',
+                note: '*東亞語言的字數統計是基於字符數，因為這些語言不使用空格分隔單詞。'
+            },
+            'zh-cn': {
+                title: '字数统计',
+                placeholder: '请在此输入您的文字...',
+                wordsLabel: '字数',
+                charsLabel: '字符',
+                blanksLabel: '空白',
+                symbolsLabel: '符号',
+                sentencesLabel: '句子',
+                note: '*东亚语言的字数统计是基于字符数，因为这些语言不使用空格分隔单词。'
+            },
+            ja: {
+                title: '文字カウンター',
+                placeholder: 'ここにテキストを入力してください...',
+                wordsLabel: '単語',
+                charsLabel: '文字',
+                blanksLabel: '空白',
+                symbolsLabel: '記号',
+                sentencesLabel: '文章',
+                note: '*東アジア言語の単語数は文字数に基づいており、これらの言語は単語を区切るためにスペースを使用しないためです。'
+            }
+        };
+
+        // Function to update the language of the UI elements
+        function updateLanguage(lang) {
+            const t = translations[lang];
+            document.getElementById('app-title').textContent = t.title;
+            textInput.placeholder = t.placeholder;
+            document.getElementById('words-label').textContent = t.wordsLabel;
+            document.getElementById('chars-label').textContent = t.charsLabel;
+            document.getElementById('blanks-label').textContent = t.blanksLabel;
+            document.getElementById('symbols-label').textContent = t.symbolsLabel;
+            document.getElementById('sentences-label').textContent = t.sentencesLabel;
+            document.querySelector('.text-sm.text-gray-500').textContent = t.note;
+        }
+
+        // Function to update all the counts based on the text input
+        function updateCounts() {
+            const text = textInput.value;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            const characters = text.length;
+            const blanks = (text.match(/\s/g) || []).length;
+            // The Unicode property escape `\p{L}` matches any kind of letter from any language.
+            // The `\p{N}` matches any kind of numeric character in any script.
+            // The `u` flag is for Unicode support in the regex.
+            const symbols = (text.replace(/[\p{L}\p{N}\s]/gu, '').length);
+            const sentences = (text.split(/[.!?。！？]/).filter(s => s.trim().length > 0).length);
+
+            wordCountDisplay.textContent = words.length;
+            charCountDisplay.textContent = characters;
+            blankCountDisplay.textContent = blanks;
+            symbolCountDisplay.textContent = symbols;
+            sentenceCountDisplay.textContent = sentences;
+        }
+
+        // Add event listeners for real-time counting and UI changes
+        textInput.addEventListener('input', updateCounts);
+        langSelector.addEventListener('change', (event) => {
+            updateLanguage(event.target.value);
+            updateCounts(); // Re-run count to update labels if needed
+        });
+
+        // Initialize counts on page load
+        updateCounts();
+
+    </script>
+</body>
+</html>
